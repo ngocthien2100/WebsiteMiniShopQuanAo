@@ -517,28 +517,46 @@ function CartPage({
       <div className="checkout-layout">
         <div className="cart-list">
           {cart.length > 0 ? (
-            cart.map((item) => (
-              <article className="cart-item" key={`${item.product.id}-${item.size}-${item.color}`}>
-                <img alt={item.product.name} src={item.product.image} />
-                <div>
-                  <h3>{item.product.name}</h3>
-                  <p>{item.size} / {item.color}</p>
-                  <strong>{formatCurrency(item.product.price)}</strong>
-                </div>
-                <div className="quantity-control">
-                  <button onClick={() => updateQuantity(item.product.id, -1)} type="button">
-                    <Minus size={16} />
+            <>
+              {cart.map((item) => (
+                <article className="cart-item" key={`${item.product.id}-${item.size}-${item.color}`}>
+                  <img alt={item.product.name} src={item.product.image} />
+                  <div>
+                    <h3>{item.product.name}</h3>
+                    <p>{item.size} / {item.color}</p>
+                    <strong>{formatCurrency(item.product.price)}</strong>
+                  </div>
+                  <div className="quantity-control">
+                    <button onClick={() => updateQuantity(item.product.id, -1)} type="button">
+                      <Minus size={16} />
+                    </button>
+                    <span>{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item.product.id, 1)} type="button">
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  <button className="icon-button" onClick={() => removeCartItem(item.product.id)} type="button">
+                    <Trash2 size={18} />
                   </button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.product.id, 1)} type="button">
-                    <Plus size={16} />
-                  </button>
-                </div>
-                <button className="icon-button" onClick={() => removeCartItem(item.product.id)} type="button">
-                  <Trash2 size={18} />
-                </button>
-              </article>
-            ))
+                </article>
+              ))}
+              <div className="cart-support">
+                <article>
+                  <Check size={18} />
+                  <div>
+                    <strong>Giao hàng</strong>
+                    <p>{shippingPolicy.delivery}</p>
+                  </div>
+                </article>
+                <article>
+                  <Bot size={18} />
+                  <div>
+                    <strong>Chatbot hỗ trợ</strong>
+                    <p>Có thể hỏi chatbot về size, ngân sách, cách đặt hàng và chính sách đổi trả.</p>
+                  </div>
+                </article>
+              </div>
+            </>
           ) : (
             <div className="empty-state">
               <ShoppingBag size={24} />

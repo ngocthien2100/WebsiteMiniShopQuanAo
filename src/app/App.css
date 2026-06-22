@@ -12,6 +12,7 @@
     radial-gradient(circle at top left, rgba(31, 111, 91, 0.12), transparent 28rem),
     linear-gradient(180deg, #fbf8f1 0%, var(--bg) 45%, #fff 100%);
   color: var(--ink);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
   min-height: 100vh;
 }
 
@@ -32,13 +33,12 @@
   display: flex;
   gap: 24px;
   justify-content: space-between;
-  left: 50%;
-  max-width: 1180px;
-  padding: 10px 14px;
+  margin: 16px auto 0;
+  max-width: 1240px;
+  padding: 10px 16px;
   position: sticky;
   top: 16px;
-  transform: translateX(-50%);
-  width: calc(100% - 32px);
+  width: min(1240px, calc(100% - 40px));
   z-index: 50;
 }
 
@@ -87,6 +87,7 @@
 .brand small {
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.2;
 }
 
 .main-nav {
@@ -97,6 +98,8 @@
 .main-nav button {
   border-radius: 999px;
   color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
   padding: 10px 15px;
   transition: 0.2s ease;
 }
@@ -123,8 +126,8 @@
 .trust-band,
 .site-footer {
   margin: 0 auto;
-  max-width: 1180px;
-  width: calc(100% - 32px);
+  max-width: 1240px;
+  width: min(1240px, calc(100% - 40px));
 }
 
 .hero-section {
@@ -148,11 +151,21 @@
 .hero-copy h1,
 .page-title-row h1,
 .detail-info h1 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(42px, 7vw, 82px);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  font-size: clamp(42px, 6vw, 76px);
+  font-weight: 800;
   letter-spacing: 0;
-  line-height: 0.95;
+  line-height: 1.02;
   margin: 0;
+}
+
+.page-title-row h1 {
+  font-size: clamp(40px, 4.6vw, 62px);
+  line-height: 1.05;
+}
+
+.detail-info h1 {
+  font-size: clamp(34px, 4vw, 54px);
 }
 
 .hero-copy p:not(.eyebrow),
@@ -249,7 +262,7 @@
 
 .section,
 .page-section {
-  padding: 72px 0;
+  padding: 56px 0 72px;
 }
 
 .section.nested {
@@ -263,15 +276,26 @@
   display: flex;
   gap: 24px;
   justify-content: space-between;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .section-heading h2,
 .checkout-form h2,
 .site-footer h2 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(30px, 4vw, 46px);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 800;
+  line-height: 1.15;
   margin: 0;
+}
+
+.checkout-form h2 {
+  font-size: 26px;
+  line-height: 1.25;
+}
+
+.site-footer h2 {
+  font-size: 36px;
 }
 
 .section-heading > p {
@@ -309,6 +333,8 @@
   border: 1px solid var(--line);
   border-radius: 16px;
   box-shadow: 0 14px 34px rgba(23, 32, 42, 0.07);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   transition: 0.2s ease;
 }
@@ -343,6 +369,9 @@
 }
 
 .product-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 16px;
 }
 
@@ -354,10 +383,14 @@
 }
 
 .product-body h3 {
+  font-size: 18px;
+  line-height: 1.35;
   margin: 8px 0 6px;
 }
 
 .product-body p {
+  flex: 1;
+  font-size: 15px;
   min-height: 54px;
 }
 
@@ -422,7 +455,7 @@
   align-items: start;
   display: grid;
   gap: 22px;
-  grid-template-columns: 270px minmax(0, 1fr);
+  grid-template-columns: 250px minmax(0, 1fr);
 }
 
 .filters-panel {
@@ -477,8 +510,8 @@
 .checkout-layout {
   align-items: start;
   display: grid;
-  gap: 32px;
-  grid-template-columns: minmax(0, 1fr) 430px;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) 390px;
 }
 
 .detail-gallery {
@@ -541,6 +574,40 @@
   color: var(--muted);
 }
 
+.cart-support {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 4px;
+}
+
+.cart-support article {
+  align-items: start;
+  background: rgba(255, 253, 248, 0.74);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 24px 1fr;
+  padding: 18px;
+}
+
+.cart-support svg {
+  color: var(--brand);
+  margin-top: 2px;
+}
+
+.cart-support strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.cart-support p {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
 .quantity-control {
   background: var(--soft);
   border-radius: 999px;
@@ -561,6 +628,7 @@
 .checkout-form {
   display: grid;
   gap: 16px;
+  padding: 24px;
   position: sticky;
   top: 104px;
 }
@@ -604,7 +672,7 @@
   display: grid;
   gap: 24px;
   grid-template-columns: 1fr 180px 180px;
-  padding: 42px 0;
+  padding: 48px 0 56px;
 }
 
 .site-footer span,
@@ -753,7 +821,8 @@
   .product-grid,
   .category-grid,
   .trust-band,
-  .related-grid {
+  .related-grid,
+  .cart-support {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -778,7 +847,8 @@
   .product-grid,
   .category-grid,
   .trust-band,
-  .related-grid {
+  .related-grid,
+  .cart-support {
     grid-template-columns: 1fr;
   }
 

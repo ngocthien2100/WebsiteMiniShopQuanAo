@@ -8,11 +8,12 @@ This project is a Vite + React frontend for the MiniStyle clothing shop demo.
 src/
   main.tsx                 App bootstrap.
   app/
-    App.tsx                Main shop shell, routing state, cart, chatbot UI.
+    App.tsx                Main shop shell, routing state, cart.
     App.css                Main application styling and animation.
   features/
     admin/                 Admin dashboard: analytics, product CRUD, users.
     auth/                  Login and register pages.
+    chatbot/               @n8n/chat package wrapper and widget configuration.
     customer/              Customer profile and order history.
     staff/                 Staff product management screen.
   shared/

@@ -4,16 +4,13 @@ import {
   Bot,
   Check,
   ChevronRight,
-  MessageCircle,
   Minus,
   Plus,
   Search,
-  Send,
   ShoppingBag,
   SlidersHorizontal,
   Sparkles,
   Trash2,
-  X,
   User as UserIcon,
   Shield,
   UserCheck,
@@ -37,12 +34,12 @@ import RegisterPage from "@/features/auth/RegisterPage";
 import AdminPanel from "@/features/admin/AdminPanel";
 import StaffPanel from "@/features/staff/StaffPanel";
 import CustomerPanel from "@/features/customer/CustomerPanel";
+import N8nChatWidget from "@/features/chatbot/N8nChatWidget";
 
 import "./App.css";
 
 type Page = "home" | "products" | "detail" | "cart" | "login" | "register" | "admin" | "staff" | "customer";
 type CartItem = { product: Product; quantity: number; size: string; color: string };
-type ChatMessage = { role: "bot" | "user"; text: string };
 
 const categories: { value: "all" | ProductCategory; label: string }[] = [
   { value: "all", label: "Tất cả" },
@@ -51,9 +48,6 @@ const categories: { value: "all" | ProductCategory; label: string }[] = [
   { value: "vay", label: "Váy" },
   { value: "phu-kien", label: "Phụ kiện" },
 ];
-
-const webhookUrl =
-  (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_N8N_CHATBOT_WEBHOOK || "";
 
 const pageVariants = {
   initial: { opacity: 0, y: 18, filter: "blur(8px)" },
@@ -346,7 +340,7 @@ function App() {
         </AnimatePresence>
       </main>
 
-      {!isDashboardView && <ChatbotWidget productsList={productsList} />}
+      {!isDashboardView && <N8nChatWidget />}
       {!isDashboardView && <Footer navigate={navigate} />}
 
       {/* QUICK ROLE SWITCHER FOR DEMO/TESTING */}
@@ -981,160 +975,6 @@ function ProductCard({
       </div>
     </motion.article>
   );
-}
-
-function ChatbotWidget({ productsList }: { productsList: Product[] }) {
-  const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "bot",
-      text: "Chào bạn, mình là chatbot tư vấn của MiniStyle. Bạn có thể hỏi: 'Tôi có 200.000đ nên mua gì?' hoặc 'Sản phẩm nào hợp sinh viên?'",
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function sendMessage(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const text = input.trim();
-    if (!text) return;
-
-    setInput("");
-    setMessages((current) => [...current, { role: "user", text }]);
-    setLoading(true);
-
-    try {
-      const answer = webhookUrl ? await askN8n(text, productsList) : buildLocalAnswer(text, productsList);
-      setMessages((current) => [...current, { role: "bot", text: answer }]);
-    } catch {
-      setMessages((current) => [
-        ...current,
-        {
-          role: "bot",
-          text: "Mình chưa kết nối được N8N webhook. Bạn kiểm tra biến VITE_N8N_CHATBOT_WEBHOOK hoặc thử lại sau nhé.",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div className="chatbot">
-      <AnimatePresence>
-        {open && (
-          <motion.section
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            className="chatbot-panel"
-            exit={{ opacity: 0, y: 12, scale: 0.96 }}
-            initial={{ opacity: 0, y: 18, scale: 0.94 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-          >
-          <div className="chatbot-header">
-            <div>
-              <strong>MiniStyle AI</strong>
-              <small>{webhookUrl ? "Đang dùng N8N webhook" : "Demo fallback nội bộ"}</small>
-            </div>
-            <button onClick={() => setOpen(false)} type="button">
-              <X size={18} />
-            </button>
-          </div>
-
-          <div className="chatbot-messages">
-            {messages.map((message, index) => (
-              <motion.div
-                animate={{ opacity: 1, y: 0 }}
-                className={`message ${message.role}`}
-                initial={{ opacity: 0, y: 8 }}
-                key={`${message.role}-${index}`}
-                transition={{ duration: 0.2 }}
-              >
-                {message.text}
-              </motion.div>
-            ))}
-            {loading && <motion.div animate={{ opacity: 1 }} className="message bot typing-message" initial={{ opacity: 0 }}>Đang tư vấn...</motion.div>}
-          </div>
-
-          <form className="chatbot-input" onSubmit={sendMessage}>
-            <input
-              onChange={(event) => setInput(event.target.value)}
-              placeholder="Nhập câu hỏi tư vấn..."
-              value={input}
-            />
-            <button type="submit">
-              <Send size={18} />
-            </button>
-          </form>
-          </motion.section>
-        )}
-      </AnimatePresence>
-
-      <motion.button
-        animate={open ? { rotate: 90 } : { rotate: 0 }}
-        className="chatbot-toggle"
-        onClick={() => setOpen((value) => !value)}
-        type="button"
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.92 }}
-      >
-        {open ? <X size={22} /> : <MessageCircle size={22} />}
-      </motion.button>
-    </div>
-  );
-}
-
-async function askN8n(question: string, productsList: Product[]) {
-  const response = await fetch(webhookUrl, {
-    body: JSON.stringify({
-      question,
-      products: productsList,
-      policy: shippingPolicy,
-      instruction:
-        "Bạn là nhân viên tư vấn bán quần áo MiniStyle. Chỉ tư vấn dựa trên dữ liệu sản phẩm và chính sách được gửi kèm. Nếu thiếu thông tin, hãy hỏi lại ngắn gọn.",
-    }),
-    headers: { "Content-Type": "application/json" },
-    method: "POST",
-  });
-
-  if (!response.ok) {
-    throw new Error("N8N webhook request failed");
-  }
-
-  const data = await response.json();
-  return data.answer || data.message || data.text || "Mình đã nhận câu hỏi nhưng N8N chưa trả về trường answer.";
-}
-
-function buildLocalAnswer(question: string, productsList: Product[]) {
-  const normalized = question.toLowerCase();
-  const budgetMatch = normalized.match(/(\d+)\s*(k|nghìn|000|đ|vnd)?/);
-  const budget = budgetMatch ? Number(budgetMatch[1]) * (budgetMatch[1].length <= 3 ? 1000 : 1) : 0;
-
-  if (normalized.includes("giao") || normalized.includes("ship")) {
-    return shippingPolicy.delivery;
-  }
-
-  if (normalized.includes("đổi") || normalized.includes("size")) {
-    return shippingPolicy.returnPolicy;
-  }
-
-  if (normalized.includes("đặt") || normalized.includes("mua")) {
-    return shippingPolicy.orderGuide;
-  }
-
-  const matched = productsList
-    .filter((product) => (budget ? product.price <= budget : true))
-    .filter((product) =>
-      normalized.includes("sinh viên")
-        ? product.suitableFor.some((item) => item.toLowerCase().includes("sinh viên"))
-        : true,
-    )
-    .slice(0, 3);
-
-  const suggestions = matched.length ? matched : productsList.slice(0, 3);
-
-  return `Mình gợi ý ${suggestions
-    .map((product) => `${product.name} (${formatCurrency(product.price)})`)
-    .join(", ")}. Lý do: các sản phẩm này dễ phối, giá rõ ràng và có mô tả phù hợp trong dữ liệu shop.`;
 }
 
 function SectionHeading({ title, description }: { title: string; description: string }) {

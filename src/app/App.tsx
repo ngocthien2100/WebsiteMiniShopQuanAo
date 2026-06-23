@@ -19,7 +19,7 @@ import {
   UserCheck,
   LogOut,
 } from "lucide-react";
-import { formatCurrency, Product, ProductCategory, shippingPolicy } from "@/data/products";
+import { formatCurrency, Product, ProductCategory, shippingPolicy } from "@/shared/data/products";
 import {
   User,
   Order,
@@ -30,13 +30,13 @@ import {
   setLoggedUser,
   getMockOrders,
   saveMockOrders,
-} from "@/data/mockDb";
+} from "@/shared/data/mockDb";
 
-import LoginPage from "./components/auth/LoginPage";
-import RegisterPage from "./components/auth/RegisterPage";
-import AdminPanel from "./components/admin/AdminPanel";
-import StaffPanel from "./components/staff/StaffPanel";
-import CustomerPanel from "./components/customer/CustomerPanel";
+import LoginPage from "@/features/auth/LoginPage";
+import RegisterPage from "@/features/auth/RegisterPage";
+import AdminPanel from "@/features/admin/AdminPanel";
+import StaffPanel from "@/features/staff/StaffPanel";
+import CustomerPanel from "@/features/customer/CustomerPanel";
 
 import "./App.css";
 

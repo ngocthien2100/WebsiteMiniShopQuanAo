@@ -28,8 +28,8 @@ import {
   saveMockOrders,
   getMockProducts,
   saveMockProducts,
-} from "@/data/mockDb";
-import { Product, ProductCategory, formatCurrency } from "@/data/products";
+} from "@/shared/data/mockDb";
+import { Product, ProductCategory, formatCurrency } from "@/shared/data/products";
 
 // Biểu đồ Recharts đơn giản
 import {

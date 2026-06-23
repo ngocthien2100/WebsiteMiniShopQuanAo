@@ -1,69 +1,50 @@
-# MiniStyle - Website bán hàng (Mini Shop)
+# MiniStyle - Website bán quần áo
 
-Hướng dẫn nhanh để chạy project và đẩy lên GitHub.
+MiniStyle là website bán hàng mini xây bằng Vite + React. Dự án có giao diện cửa hàng, giỏ hàng, đặt hàng mẫu, đăng nhập/đăng ký, phân quyền Admin/Staff/Customer và chatbot tư vấn sản phẩm qua n8n webhook.
 
-## Chạy project (frontend)
+## Chạy dự án
 
-Yêu cầu: Node.js 18+, npm hoặc pnpm.
+Yêu cầu: Node.js 18+.
 
-1. Cài dependencies
-
-```powershell
-cd "C:\Users\Administrator\WebsiteMiniShopQuanAo"
+```bash
 npm install
-```
-
-2. Tạo file biến môi trường frontend (không commit)
-
-Tạo `.env.local` ở gốc project và thêm:
-
-```env
-VITE_N8N_CHATBOT_WEBHOOK=http://localhost:5678/webhook/ministyle-chatbot
-```
-
-3. Chạy dev server
-
-```powershell
 npm run dev
 ```
 
-## Đẩy lên GitHub
+Build production:
 
-1. Khởi tạo git (nếu chưa)
-
-```powershell
-cd "C:\Users\Administrator\WebsiteMiniShopQuanAo"
-git init
-git add .gitignore README.md
-git commit -m "chore: add .gitignore and README"
-git branch -M main
+```bash
+npm run build
 ```
 
-2. Tạo repo trên GitHub (tùy chọn)
+## Cấu hình chatbot n8n
 
-- Tạo repository trên github.com và lấy URL, rồi:
+Tạo file `.env.local` ở thư mục gốc nếu muốn kết nối webhook thật:
 
-```powershell
-git remote add origin https://github.com/USER/REPO.git
-git push -u origin main
+```env
+VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/ministyle-chatbot
 ```
 
-- Hoặc dùng GitHub CLI `gh`:
+Nếu không có biến môi trường này, chatbot sẽ dùng câu trả lời fallback nội bộ để demo.
 
-```powershell
-gh repo create USER/REPO --public --source=. --remote=origin --push
+## Cấu trúc chính
+
+```text
+src/
+  app/            App shell, routing state, cart, chatbot UI, main CSS.
+  features/       Các màn hình nghiệp vụ theo vai trò: auth, admin, staff, customer.
+  shared/data/    Dữ liệu sản phẩm, mock users, mock orders, localStorage helpers.
+  styles/         Global CSS, Tailwind entry, theme và fonts.
 ```
 
-3. Đừng commit file `.env.local` hoặc API keys.
+Chi tiết hơn: xem [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 
-## Nội dung khác
-- Docs: `docs/chatbot-n8n-guide.md`
-- Source: `src/`
+## Tài liệu liên quan
 
-Nếu muốn, mình có thể: soạn sẵn nội dung `DESCRIPTION.md`, thêm badge CI, hoặc giúp tạo repo & push trực tiếp (nếu bạn đã đăng nhập `gh` CLI trên máy)." 
-## Running the code
+- [docs/chatbot-n8n-guide.md](./docs/chatbot-n8n-guide.md)
+- [docs/chatbot-test-cases.md](./docs/chatbot-test-cases.md)
+- [docs/prompt-library.md](./docs/prompt-library.md)
 
-Run `npm i` to install the dependencies.
+## Ghi chú review code
 
-Run `npm run dev` to start the development server.
-  
+Các file sinh tự động/không còn được app import đã được đưa vào `archive/generated/` để giữ lịch sử nhưng không làm rối source chính trong `src`.

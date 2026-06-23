@@ -1,6 +1,6 @@
 import { useState, FormEvent } from "react";
 import { LogIn, Key, Mail, ShieldAlert, UserCheck, Shield } from "lucide-react";
-import { getMockUsers, setLoggedUser, User } from "@/data/mockDb";
+import { getMockUsers, setLoggedUser, User } from "@/shared/data/mockDb";
 
 interface LoginPageProps {
   onLoginSuccess: (user: User) => void;

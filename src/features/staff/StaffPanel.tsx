@@ -12,8 +12,8 @@ import {
   User,
   getMockProducts,
   saveMockProducts,
-} from "@/data/mockDb";
-import { Product, ProductCategory, formatCurrency } from "@/data/products";
+} from "@/shared/data/mockDb";
+import { Product, ProductCategory, formatCurrency } from "@/shared/data/products";
 
 interface StaffPanelProps {
   currentUser: User;

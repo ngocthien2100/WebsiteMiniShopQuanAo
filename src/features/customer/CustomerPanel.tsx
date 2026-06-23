@@ -18,8 +18,8 @@ import {
   OrderStatus,
   getMockOrders,
   saveMockOrders,
-} from "@/data/mockDb";
-import { formatCurrency } from "@/data/products";
+} from "@/shared/data/mockDb";
+import { formatCurrency } from "@/shared/data/products";
 
 interface CustomerPanelProps {
   currentUser: User;

@@ -1,6 +1,6 @@
 import { useState, FormEvent } from "react";
 import { UserPlus, Key, Mail, User as UserIcon, ShieldAlert, CheckCircle2 } from "lucide-react";
-import { getMockUsers, saveMockUsers, setLoggedUser, User } from "@/data/mockDb";
+import { getMockUsers, saveMockUsers, setLoggedUser, User } from "@/shared/data/mockDb";
 
 interface RegisterPageProps {
   onRegisterSuccess: (user: User) => void;

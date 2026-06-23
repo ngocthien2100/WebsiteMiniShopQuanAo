@@ -1,4 +1,5 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState, useEffect } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   Bot,
   Check,
@@ -13,11 +14,33 @@ import {
   Sparkles,
   Trash2,
   X,
+  User as UserIcon,
+  Shield,
+  UserCheck,
+  LogOut,
 } from "lucide-react";
-import { formatCurrency, Product, ProductCategory, products, shippingPolicy } from "@/data/products";
+import { formatCurrency, Product, ProductCategory, shippingPolicy } from "@/data/products";
+import {
+  User,
+  Order,
+  initMockDb,
+  getMockProducts,
+  getLoggedUser,
+  getMockUsers,
+  setLoggedUser,
+  getMockOrders,
+  saveMockOrders,
+} from "@/data/mockDb";
+
+import LoginPage from "./components/auth/LoginPage";
+import RegisterPage from "./components/auth/RegisterPage";
+import AdminPanel from "./components/admin/AdminPanel";
+import StaffPanel from "./components/staff/StaffPanel";
+import CustomerPanel from "./components/customer/CustomerPanel";
+
 import "./App.css";
 
-type Page = "home" | "products" | "detail" | "cart";
+type Page = "home" | "products" | "detail" | "cart" | "login" | "register" | "admin" | "staff" | "customer";
 type CartItem = { product: Product; quantity: number; size: string; color: string };
 type ChatMessage = { role: "bot" | "user"; text: string };
 
@@ -32,30 +55,68 @@ const categories: { value: "all" | ProductCategory; label: string }[] = [
 const webhookUrl =
   (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_N8N_CHATBOT_WEBHOOK || "";
 
+const pageVariants = {
+  initial: { opacity: 0, y: 18, filter: "blur(8px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  exit: { opacity: 0, y: -12, filter: "blur(6px)" },
+};
+
+const revealVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0 },
+};
+
 function App() {
   const [page, setPage] = useState<Page>("home");
-  const [selectedProduct, setSelectedProduct] = useState<Product>(products[0]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [productsList, setProductsList] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
   const [cart, setCart] = useState<CartItem[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<"all" | ProductCategory>("all");
   const [maxPrice, setMaxPrice] = useState(500000);
   const [orderDone, setOrderDone] = useState(false);
 
+  // Form đặt hàng
+  const [customerName, setCustomerName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [notes, setNotes] = useState("");
+
+  // Khởi tạo mock DB và đồng bộ dữ liệu
+  useEffect(() => {
+    initMockDb();
+    setProductsList(getMockProducts());
+    const logged = getLoggedUser();
+    if (logged) {
+      setCurrentUser(logged);
+      setCustomerName(logged.name);
+    }
+  }, []);
+
+  // Lắng nghe sự thay đổi của trang để cập nhật lại danh sách sản phẩm (ví dụ sau khi Admin/Staff chỉnh sửa)
+  useEffect(() => {
+    if (page === "products" || page === "home" || page === "detail") {
+      setProductsList(getMockProducts());
+    }
+  }, [page]);
+
   const filteredProducts = useMemo(() => {
     const keyword = query.trim().toLowerCase();
-    return products.filter((product) => {
+    return productsList.filter((product) => {
       const inCategory = category === "all" || product.category === category;
       const inPrice = product.price <= maxPrice;
       const inSearch =
         !keyword ||
-        [product.name, product.categoryLabel, product.shortDescription, ...product.tags]
+        [product.name, product.categoryLabel, product.shortDescription, ...(product.tags || [])]
           .join(" ")
           .toLowerCase()
           .includes(keyword);
 
       return inCategory && inPrice && inSearch;
     });
-  }, [category, maxPrice, query]);
+  }, [category, maxPrice, query, productsList]);
 
   const cartTotal = cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
   const cartQuantity = cart.reduce((total, item) => total + item.quantity, 0);
@@ -103,62 +164,210 @@ function App() {
     setCart((current) => current.filter((item) => item.product.id !== productId));
   }
 
+  // Đặt hàng thực tế & Lưu vào Mock DB
   function submitOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    // Tạo đơn hàng mới
+    const newOrder: Order = {
+      id: "MS-" + (1000 + getMockOrders().length + 1),
+      customerId: currentUser ? currentUser.id : "guest-customer",
+      customerName: customerName || "Khách vãng lai",
+      phone: phone,
+      address: address,
+      notes: notes,
+      items: cart,
+      total: cartTotal + (cartTotal >= 500000 ? 0 : 30000),
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    };
+
+    // Lưu vào Mock DB
+    const allOrders = getMockOrders();
+    saveMockOrders([...allOrders, newOrder]);
+
+    setCart([]);
     setOrderDone(true);
+
+    // Chuyển hướng
+    setTimeout(() => {
+      if (currentUser) {
+        navigate("customer"); // Chuyển sang quản lý đơn hàng của Customer
+      } else {
+        alert("Đặt hàng thành công! (Bạn đang mua sắm với tư cách khách)");
+        navigate("home");
+      }
+    }, 1500);
   }
+
+  const handleLogout = () => {
+    setLoggedUser(null);
+    setCurrentUser(null);
+    setCustomerName("");
+    navigate("home");
+  };
+
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    setCustomerName(user.name);
+    if (user.role === "admin") {
+      navigate("admin");
+    } else if (user.role === "staff") {
+      navigate("staff");
+    } else {
+      navigate("home");
+    }
+  };
+
+  const handleRegisterSuccess = (user: User) => {
+    setCurrentUser(user);
+    setCustomerName(user.name);
+    navigate("home");
+  };
+
+  // Tránh hiển thị Header và Footer của cửa hàng khi đang ở trang quản trị Admin hoặc Staff
+  const isDashboardView = page === "admin" || page === "staff";
 
   return (
     <div className="shop-app">
-      <Header page={page} cartQuantity={cartQuantity} navigate={navigate} />
+      {!isDashboardView && (
+        <Header 
+          page={page} 
+          cartQuantity={cartQuantity} 
+          navigate={navigate} 
+          currentUser={currentUser}
+          onLogout={handleLogout}
+        />
+      )}
 
-      <main>
-        {page === "home" && (
-          <HomePage
-            navigate={navigate}
-            openProduct={openProduct}
-            addToCart={addToCart}
-          />
-        )}
+      <main className={isDashboardView ? "no-padding" : ""}>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            animate="animate"
+            className="page-motion-frame"
+            exit="exit"
+            initial="initial"
+            key={page}
+            transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+            variants={pageVariants}
+          >
+            {page === "home" && (
+              <HomePage
+                productsList={productsList}
+                navigate={navigate}
+                openProduct={openProduct}
+                addToCart={addToCart}
+              />
+            )}
 
-        {page === "products" && (
-          <ProductsPage
-            products={filteredProducts}
-            query={query}
-            setQuery={setQuery}
-            category={category}
-            setCategory={setCategory}
-            maxPrice={maxPrice}
-            setMaxPrice={setMaxPrice}
-            openProduct={openProduct}
-            addToCart={addToCart}
-          />
-        )}
+            {page === "products" && (
+              <ProductsPage
+                products={filteredProducts}
+                query={query}
+                setQuery={setQuery}
+                category={category}
+                setCategory={setCategory}
+                maxPrice={maxPrice}
+                setMaxPrice={setMaxPrice}
+                openProduct={openProduct}
+                addToCart={addToCart}
+              />
+            )}
 
-        {page === "detail" && (
-          <ProductDetailPage
-            product={selectedProduct}
-            addToCart={addToCart}
-            openProduct={openProduct}
-            navigate={navigate}
-          />
-        )}
+            {page === "detail" && selectedProduct && (
+              <ProductDetailPage
+                product={selectedProduct}
+                addToCart={addToCart}
+                openProduct={openProduct}
+                navigate={navigate}
+              />
+            )}
 
-        {page === "cart" && (
-          <CartPage
-            cart={cart}
-            cartTotal={cartTotal}
-            updateQuantity={updateQuantity}
-            removeCartItem={removeCartItem}
-            submitOrder={submitOrder}
-            orderDone={orderDone}
-            navigate={navigate}
-          />
-        )}
+            {page === "cart" && (
+              <CartPage
+                cart={cart}
+                cartTotal={cartTotal}
+                updateQuantity={updateQuantity}
+                removeCartItem={removeCartItem}
+                submitOrder={submitOrder}
+                orderDone={orderDone}
+                navigate={navigate}
+                currentUser={currentUser}
+                customerName={customerName}
+                setCustomerName={setCustomerName}
+                phone={phone}
+                setPhone={setPhone}
+                address={address}
+                setAddress={setAddress}
+                notes={notes}
+                setNotes={setNotes}
+              />
+            )}
+
+            {page === "login" && (
+              <LoginPage
+                onLoginSuccess={handleLoginSuccess}
+                onNavigateToRegister={() => navigate("register")}
+                onNavigateHome={() => navigate("home")}
+              />
+            )}
+
+            {page === "register" && (
+              <RegisterPage
+                onRegisterSuccess={handleRegisterSuccess}
+                onNavigateToLogin={() => navigate("login")}
+                onNavigateHome={() => navigate("home")}
+              />
+            )}
+
+            {page === "admin" && currentUser && currentUser.role === "admin" && (
+              <AdminPanel
+                currentUser={currentUser}
+                onLogout={handleLogout}
+                onNavigateHome={() => navigate("home")}
+              />
+            )}
+
+            {page === "staff" && currentUser && currentUser.role === "staff" && (
+              <StaffPanel
+                currentUser={currentUser}
+                onLogout={handleLogout}
+                onNavigateHome={() => navigate("home")}
+              />
+            )}
+
+            {page === "customer" && currentUser && (
+              <CustomerPanel
+                currentUser={currentUser}
+                onNavigateHome={() => navigate("home")}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
-      <ChatbotWidget />
-      <Footer />
+      {!isDashboardView && <ChatbotWidget productsList={productsList} />}
+      {!isDashboardView && <Footer navigate={navigate} />}
+
+      {/* QUICK ROLE SWITCHER FOR DEMO/TESTING */}
+      <QuickRoleSwitcher 
+        currentUser={currentUser} 
+        onSwitchRole={(role) => {
+          if (role === null) {
+            handleLogout();
+            return;
+          }
+          // Tìm user tương ứng trong Mock DB
+          const users = getMockUsers();
+          const target = users.find(u => u.role === role);
+          if (target) {
+            setLoggedUser(target);
+            setCurrentUser(target);
+            setCustomerName(target.name);
+            navigate(role === "admin" ? "admin" : role === "staff" ? "staff" : "home");
+          }
+        }}
+      />
     </div>
   );
 }
@@ -167,11 +376,17 @@ function Header({
   page,
   cartQuantity,
   navigate,
+  currentUser,
+  onLogout,
 }: {
   page: Page;
   cartQuantity: number;
   navigate: (page: Page) => void;
+  currentUser: User | null;
+  onLogout: () => void;
 }) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   return (
     <header className="site-header">
       <button className="brand" onClick={() => navigate("home")} type="button">
@@ -186,7 +401,6 @@ function Header({
         {[
           ["home", "Trang chủ"],
           ["products", "Sản phẩm"],
-          ["detail", "Chi tiết"],
           ["cart", "Giỏ hàng"],
         ].map(([id, label]) => (
           <button
@@ -200,29 +414,90 @@ function Header({
         ))}
       </nav>
 
-      <button className="cart-button" onClick={() => navigate("cart")} type="button">
-        <ShoppingBag size={18} />
-        <span>{cartQuantity}</span>
-      </button>
+      <div className="header-actions">
+        <button className="cart-button" onClick={() => navigate("cart")} type="button">
+          <ShoppingBag size={18} />
+          <span>{cartQuantity}</span>
+        </button>
+
+        {currentUser ? (
+          <div className="user-profile-menu">
+            <button 
+              className="profile-trigger" 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              type="button"
+            >
+              <div className="avatar-placeholder">
+                {currentUser.name.charAt(0).toUpperCase()}
+              </div>
+              <span className="user-display-name">{currentUser.name}</span>
+            </button>
+
+            {dropdownOpen && (
+              <div className="profile-dropdown-menu">
+                <div className="dropdown-user-info">
+                  <strong>{currentUser.name}</strong>
+                  <span className="role-tag">{currentUser.role}</span>
+                </div>
+                <hr />
+                {currentUser.role === "admin" && (
+                  <button onClick={() => { navigate("admin"); setDropdownOpen(false); }}>
+                    <Shield size={16} /> Admin Portal
+                  </button>
+                )}
+                {currentUser.role === "staff" && (
+                  <button onClick={() => { navigate("staff"); setDropdownOpen(false); }}>
+                    <UserCheck size={16} /> Staff Portal
+                  </button>
+                )}
+                {currentUser.role === "customer" && (
+                  <button onClick={() => { navigate("customer"); setDropdownOpen(false); }}>
+                    <ShoppingBag size={16} /> Đơn hàng của tôi
+                  </button>
+                )}
+                <button onClick={() => { navigate("customer"); setDropdownOpen(false); }}>
+                  <UserIcon size={16} /> Trang cá nhân
+                </button>
+                <hr />
+                <button className="dropdown-logout" onClick={() => { onLogout(); setDropdownOpen(false); }}>
+                  <LogOut size={16} /> Đăng xuất
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button className="primary-button login-nav-btn" onClick={() => navigate("login")} type="button">
+            <UserIcon size={16} /> Đăng nhập
+          </button>
+        )}
+      </div>
     </header>
   );
 }
 
 function HomePage({
+  productsList,
   navigate,
   openProduct,
   addToCart,
 }: {
+  productsList: Product[];
   navigate: (page: Page) => void;
   openProduct: (product: Product) => void;
   addToCart: (product: Product) => void;
 }) {
-  const featured = products.slice(0, 4);
+  const featured = productsList.slice(0, 4);
 
   return (
     <>
       <section className="hero-section">
-        <div className="hero-copy">
+        <motion.div
+          animate="visible"
+          className="hero-copy"
+          initial="hidden"
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          variants={revealVariants}
+        >
           <p className="eyebrow">Bộ sưu tập mini cho sinh viên</p>
           <h1>Nâng tầm phong cách mỗi ngày</h1>
           <p>
@@ -237,17 +512,28 @@ function HomePage({
               Xem bộ sưu tập
             </button>
           </div>
-        </div>
-        <div className="hero-media" aria-label="Ảnh lookbook thời trang">
+        </motion.div>
+        <motion.div
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          aria-label="Ảnh lookbook thời trang"
+          className="hero-media"
+          initial={{ opacity: 0, scale: 0.94, rotate: 1.5 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
+        >
           <img
             alt="Người mẫu mặc trang phục tối giản"
             src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=85"
           />
-          <div className="floating-note">
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            className="floating-note"
+            initial={{ opacity: 0, y: 16 }}
+            transition={{ delay: 0.55, duration: 0.4 }}
+          >
             <Sparkles size={18} />
-            8 sản phẩm mẫu, sẵn sàng cho chatbot tư vấn
-          </div>
-        </div>
+            Hệ thống phân quyền & Chatbot tư vấn sẵn sàng!
+          </motion.div>
+        </motion.div>
       </section>
 
       <section className="section">
@@ -256,16 +542,23 @@ function HomePage({
           description="Bố cục rõ ràng để người xem demo hiểu nhanh shop đang bán gì."
         />
         <div className="category-grid">
-          {categories.slice(1).map((item) => (
-            <button
+          {categories.slice(1).map((item, index) => (
+            <motion.button
               className="category-card"
+              initial="hidden"
               key={item.value}
               onClick={() => navigate("products")}
+              transition={{ delay: index * 0.06, duration: 0.38 }}
               type="button"
+              variants={revealVariants}
+              viewport={{ once: true, amount: 0.35 }}
+              whileHover={{ y: -6, scale: 1.015 }}
+              whileInView="visible"
+              whileTap={{ scale: 0.98 }}
             >
               <span>{item.label}</span>
               <ChevronRight size={18} />
-            </button>
+            </motion.button>
           ))}
         </div>
       </section>
@@ -292,12 +585,19 @@ function HomePage({
           ["Giao hàng nhanh", shippingPolicy.delivery],
           ["Đổi size dễ dàng", shippingPolicy.returnPolicy],
           ["Chatbot tư vấn", "Hỏi theo ngân sách, phong cách, danh mục hoặc cách đặt hàng."],
-        ].map(([title, text]) => (
-          <article key={title}>
+        ].map(([title, text], index) => (
+          <motion.article
+            initial="hidden"
+            key={title}
+            transition={{ delay: index * 0.08, duration: 0.38 }}
+            variants={revealVariants}
+            viewport={{ once: true, amount: 0.25 }}
+            whileInView="visible"
+          >
             <Check size={22} />
             <h3>{title}</h3>
             <p>{text}</p>
-          </article>
+          </motion.article>
         ))}
       </section>
     </>
@@ -331,7 +631,7 @@ function ProductsPage({
         <div>
           <p className="eyebrow">Danh sách sản phẩm</p>
           <h1>Sản phẩm MiniStyle</h1>
-          <p>Hiển thị {products.length} trên {products.length === 1 ? "1 sản phẩm" : "8 sản phẩm mẫu"}.</p>
+          <p>Hiển thị {products.length} sản phẩm trong hệ thống.</p>
         </div>
         <div className="search-box">
           <Search size={18} />
@@ -367,7 +667,7 @@ function ProductsPage({
           <label>
             Giá tối đa: {formatCurrency(maxPrice)}
             <input
-              max="500000"
+              max="1000000"
               min="100000"
               onChange={(event) => setMaxPrice(Number(event.target.value))}
               step="50000"
@@ -377,8 +677,8 @@ function ProductsPage({
           </label>
 
           <div className="policy-box">
-            <strong>Dữ liệu chatbot</strong>
-            <p>Danh mục, giá, mô tả và chính sách ở trang này sẽ được gửi cho N8N khi tư vấn.</p>
+            <strong>Dữ liệu phân quyền</strong>
+            <p>Admin và Staff có thể thêm, chỉnh sửa sản phẩm và sự thay đổi sẽ xuất hiện ngay tại đây.</p>
           </div>
         </aside>
 
@@ -419,7 +719,9 @@ function ProductDetailPage({
   const [size, setSize] = useState(product.sizes[0]);
   const [color, setColor] = useState(product.colors[0]);
 
-  const related = products.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 3);
+  // Cần lấy danh sách sản phẩm từ localStorage để liên quan hiển thị đúng
+  const productsList = getMockProducts();
+  const related = productsList.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 3);
 
   return (
     <section className="page-section">
@@ -460,7 +762,7 @@ function ProductDetailPage({
             <button className="primary-button" onClick={() => addToCart(product, size, color)} type="button">
               Thêm vào giỏ
             </button>
-            <button className="secondary-button" onClick={() => navigate("cart")} type="button">
+            <button className="secondary-button" onClick={() => { addToCart(product, size, color); navigate("cart"); }} type="button">
               Mua ngay
             </button>
           </div>
@@ -492,6 +794,15 @@ function CartPage({
   submitOrder,
   orderDone,
   navigate,
+  currentUser,
+  customerName,
+  setCustomerName,
+  phone,
+  setPhone,
+  address,
+  setAddress,
+  notes,
+  setNotes,
 }: {
   cart: CartItem[];
   cartTotal: number;
@@ -500,6 +811,15 @@ function CartPage({
   submitOrder: (event: FormEvent<HTMLFormElement>) => void;
   orderDone: boolean;
   navigate: (page: Page) => void;
+  currentUser: User | null;
+  customerName: string;
+  setCustomerName: (value: string) => void;
+  phone: string;
+  setPhone: (value: string) => void;
+  address: string;
+  setAddress: (value: string) => void;
+  notes: string;
+  setNotes: (value: string) => void;
 }) {
   const shippingFee = cartTotal >= 500000 || cartTotal === 0 ? 0 : 30000;
   const finalTotal = cartTotal + shippingFee;
@@ -510,7 +830,7 @@ function CartPage({
         <div>
           <p className="eyebrow">Giỏ hàng & thanh toán</p>
           <h1>Hoàn tất đơn hàng</h1>
-          <p>Form đặt hàng mẫu, không xử lý thanh toán thật để đảm bảo an toàn đồ án.</p>
+          <p>Đặt hàng mẫu để lưu trữ thông tin đơn hàng vào hệ thống.</p>
         </div>
       </div>
 
@@ -518,8 +838,14 @@ function CartPage({
         <div className="cart-list">
           {cart.length > 0 ? (
             <>
-              {cart.map((item) => (
-                <article className="cart-item" key={`${item.product.id}-${item.size}-${item.color}`}>
+              {cart.map((item, index) => (
+                <motion.article
+                  animate={{ opacity: 1, x: 0 }}
+                  className="cart-item"
+                  initial={{ opacity: 0, x: -16 }}
+                  key={`${item.product.id}-${item.size}-${item.color}`}
+                  transition={{ delay: index * 0.04, duration: 0.28 }}
+                >
                   <img alt={item.product.name} src={item.product.image} />
                   <div>
                     <h3>{item.product.name}</h3>
@@ -538,7 +864,7 @@ function CartPage({
                   <button className="icon-button" onClick={() => removeCartItem(item.product.id)} type="button">
                     <Trash2 size={18} />
                   </button>
-                </article>
+                </motion.article>
               ))}
               <div className="cart-support">
                 <article>
@@ -571,21 +897,26 @@ function CartPage({
 
         <form className="checkout-form" onSubmit={submitOrder}>
           <h2>Thông tin khách hàng</h2>
+          {!currentUser && (
+            <div className="auth-alert-cart">
+              Bạn chưa đăng nhập. Hãy <button type="button" className="text-button inline-btn" onClick={() => navigate("login")}>Đăng nhập</button> để lưu đơn hàng vào trang cá nhân.
+            </div>
+          )}
           <label>
             Họ và tên
-            <input required placeholder="Nguyễn Văn A" />
+            <input required placeholder="Nguyễn Văn A" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
           </label>
           <label>
             Số điện thoại
-            <input required pattern="[0-9 ]{9,13}" placeholder="090 123 4567" />
+            <input required pattern="[0-9 ]{9,13}" placeholder="090 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </label>
           <label>
             Địa chỉ giao hàng
-            <input required placeholder="Số nhà, đường, phường/xã..." />
+            <input required placeholder="Số nhà, đường, phường/xã..." value={address} onChange={(e) => setAddress(e.target.value)} />
           </label>
           <label>
             Ghi chú
-            <textarea placeholder="Giao giờ hành chính, gọi trước khi đến..." />
+            <textarea placeholder="Giao giờ hành chính, gọi trước khi đến..." value={notes} onChange={(e) => setNotes(e.target.value)} />
           </label>
 
           <div className="summary">
@@ -604,7 +935,7 @@ function CartPage({
           {orderDone && (
             <div className="success-message">
               <Check size={18} />
-              Đơn hàng mẫu đã được ghi nhận. Khi demo, bạn có thể nói đây là bước mô phỏng.
+              Đơn hàng mẫu đã được ghi nhận. Bạn đang được tự động chuyển hướng...
             </div>
           )}
         </form>
@@ -623,7 +954,16 @@ function ProductCard({
   addToCart: (product: Product) => void;
 }) {
   return (
-    <article className="product-card">
+    <motion.article
+      className="product-card"
+      initial="hidden"
+      layout
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      variants={revealVariants}
+      viewport={{ once: true, amount: 0.2 }}
+      whileHover={{ y: -7 }}
+      whileInView="visible"
+    >
       <button className="product-image" onClick={() => openProduct(product)} type="button">
         {product.badge && <span className="badge">{product.badge}</span>}
         <img alt={product.name} src={product.image} />
@@ -639,11 +979,11 @@ function ProductCard({
           </button>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
-function ChatbotWidget() {
+function ChatbotWidget({ productsList }: { productsList: Product[] }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -664,7 +1004,7 @@ function ChatbotWidget() {
     setLoading(true);
 
     try {
-      const answer = webhookUrl ? await askN8n(text) : buildLocalAnswer(text);
+      const answer = webhookUrl ? await askN8n(text, productsList) : buildLocalAnswer(text, productsList);
       setMessages((current) => [...current, { role: "bot", text: answer }]);
     } catch {
       setMessages((current) => [
@@ -681,8 +1021,15 @@ function ChatbotWidget() {
 
   return (
     <div className="chatbot">
-      {open && (
-        <section className="chatbot-panel">
+      <AnimatePresence>
+        {open && (
+          <motion.section
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="chatbot-panel"
+            exit={{ opacity: 0, y: 12, scale: 0.96 }}
+            initial={{ opacity: 0, y: 18, scale: 0.94 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
           <div className="chatbot-header">
             <div>
               <strong>MiniStyle AI</strong>
@@ -695,11 +1042,17 @@ function ChatbotWidget() {
 
           <div className="chatbot-messages">
             {messages.map((message, index) => (
-              <div className={`message ${message.role}`} key={`${message.role}-${index}`}>
+              <motion.div
+                animate={{ opacity: 1, y: 0 }}
+                className={`message ${message.role}`}
+                initial={{ opacity: 0, y: 8 }}
+                key={`${message.role}-${index}`}
+                transition={{ duration: 0.2 }}
+              >
                 {message.text}
-              </div>
+              </motion.div>
             ))}
-            {loading && <div className="message bot">Đang tư vấn...</div>}
+            {loading && <motion.div animate={{ opacity: 1 }} className="message bot typing-message" initial={{ opacity: 0 }}>Đang tư vấn...</motion.div>}
           </div>
 
           <form className="chatbot-input" onSubmit={sendMessage}>
@@ -712,21 +1065,29 @@ function ChatbotWidget() {
               <Send size={18} />
             </button>
           </form>
-        </section>
-      )}
+          </motion.section>
+        )}
+      </AnimatePresence>
 
-      <button className="chatbot-toggle" onClick={() => setOpen((value) => !value)} type="button">
+      <motion.button
+        animate={open ? { rotate: 90 } : { rotate: 0 }}
+        className="chatbot-toggle"
+        onClick={() => setOpen((value) => !value)}
+        type="button"
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+      >
         {open ? <X size={22} /> : <MessageCircle size={22} />}
-      </button>
+      </motion.button>
     </div>
   );
 }
 
-async function askN8n(question: string) {
+async function askN8n(question: string, productsList: Product[]) {
   const response = await fetch(webhookUrl, {
     body: JSON.stringify({
       question,
-      products,
+      products: productsList,
       policy: shippingPolicy,
       instruction:
         "Bạn là nhân viên tư vấn bán quần áo MiniStyle. Chỉ tư vấn dựa trên dữ liệu sản phẩm và chính sách được gửi kèm. Nếu thiếu thông tin, hãy hỏi lại ngắn gọn.",
@@ -743,7 +1104,7 @@ async function askN8n(question: string) {
   return data.answer || data.message || data.text || "Mình đã nhận câu hỏi nhưng N8N chưa trả về trường answer.";
 }
 
-function buildLocalAnswer(question: string) {
+function buildLocalAnswer(question: string, productsList: Product[]) {
   const normalized = question.toLowerCase();
   const budgetMatch = normalized.match(/(\d+)\s*(k|nghìn|000|đ|vnd)?/);
   const budget = budgetMatch ? Number(budgetMatch[1]) * (budgetMatch[1].length <= 3 ? 1000 : 1) : 0;
@@ -760,7 +1121,7 @@ function buildLocalAnswer(question: string) {
     return shippingPolicy.orderGuide;
   }
 
-  const matched = products
+  const matched = productsList
     .filter((product) => (budget ? product.price <= budget : true))
     .filter((product) =>
       normalized.includes("sinh viên")
@@ -769,7 +1130,7 @@ function buildLocalAnswer(question: string) {
     )
     .slice(0, 3);
 
-  const suggestions = matched.length ? matched : products.slice(0, 3);
+  const suggestions = matched.length ? matched : productsList.slice(0, 3);
 
   return `Mình gợi ý ${suggestions
     .map((product) => `${product.name} (${formatCurrency(product.price)})`)
@@ -788,7 +1149,7 @@ function SectionHeading({ title, description }: { title: string; description: st
   );
 }
 
-function Footer() {
+function Footer({ navigate }: { navigate: (page: Page) => void }) {
   return (
     <footer className="site-footer">
       <div>
@@ -797,9 +1158,9 @@ function Footer() {
       </div>
       <div>
         <strong>Liên kết</strong>
-        <span>Trang chủ</span>
-        <span>Sản phẩm</span>
-        <span>Giỏ hàng</span>
+        <span style={{ cursor: "pointer" }} onClick={() => navigate("home")}>Trang chủ</span>
+        <span style={{ cursor: "pointer" }} onClick={() => navigate("products")}>Sản phẩm</span>
+        <span style={{ cursor: "pointer" }} onClick={() => navigate("cart")}>Giỏ hàng</span>
       </div>
       <div>
         <strong>Mạng xã hội</strong>
@@ -808,6 +1169,67 @@ function Footer() {
         <span>TikTok</span>
       </div>
     </footer>
+  );
+}
+
+// BỘ CHUYỂN VAI TRÒ NHANH PHỤC VỤ DEMO DỄ DÀNG
+function QuickRoleSwitcher({ 
+  currentUser, 
+  onSwitchRole 
+}: { 
+  currentUser: User | null;
+  onSwitchRole: (role: "admin" | "staff" | "customer" | null) => void;
+}) {
+  const [collapsed, setCollapsed] = useState(true);
+
+  if (collapsed) {
+    return (
+      <button 
+        className="quick-switcher-collapsed-btn" 
+        onClick={() => setCollapsed(false)}
+        title="Mở bảng chuyển quyền nhanh"
+      >
+        <Shield size={18} /> Chuyển Quyền
+      </button>
+    );
+  }
+
+  return (
+    <div className="quick-role-switcher-widget">
+      <div className="widget-header">
+        <strong>Demo Switcher (Chuyển vai trò)</strong>
+        <button onClick={() => setCollapsed(true)}>×</button>
+      </div>
+      <div className="widget-body">
+        <p>Hiện tại: <strong>{currentUser ? `${currentUser.name} (${currentUser.role})` : "Khách vãng lai"}</strong></p>
+        <div className="switcher-btn-grid">
+          <button 
+            className={`btn-sw admin-sw ${currentUser?.role === "admin" ? "active" : ""}`}
+            onClick={() => onSwitchRole("admin")}
+          >
+            Admin
+          </button>
+          <button 
+            className={`btn-sw staff-sw ${currentUser?.role === "staff" ? "active" : ""}`}
+            onClick={() => onSwitchRole("staff")}
+          >
+            Staff
+          </button>
+          <button 
+            className={`btn-sw customer-sw ${currentUser?.role === "customer" ? "active" : ""}`}
+            onClick={() => onSwitchRole("customer")}
+          >
+            Customer
+          </button>
+          <button 
+            className="btn-sw logout-sw"
+            onClick={() => onSwitchRole(null)}
+          >
+            Log Out
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

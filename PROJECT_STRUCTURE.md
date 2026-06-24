@@ -18,6 +18,8 @@ src/
     staff/                 Staff product management screen.
   shared/
     data/                  Product catalog, mock users, mock orders, localStorage DB helpers.
+    services/              Data repositories for Supabase with localStorage fallback.
+    supabase/              Frontend Supabase client configuration.
   styles/                  Global CSS, Tailwind entry, theme and font imports.
 ```
 
@@ -27,7 +29,15 @@ src/
 docs/
   chatbot-n8n-guide.md     n8n workflow setup notes.
   chatbot-test-cases.md    Chatbot demo and test prompts.
+  database-supabase-guide.md Supabase database, Netlify env, and n8n data access guide.
   prompt-library.md        Prompt examples for chatbot/product advice.
+```
+
+## Database
+
+```text
+supabase/
+  schema.sql               Tables, Row Level Security policies, and seed data.
 ```
 
 ## Generated archive

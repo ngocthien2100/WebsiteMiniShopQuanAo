@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ShoppingBag,
   Clock,
@@ -17,9 +17,9 @@ import {
   Order,
   OrderStatus,
   getMockOrders,
-  saveMockOrders,
 } from "@/shared/data/mockDb";
 import { formatCurrency } from "@/shared/data/products";
+import { loadOrders, updateOrderStatus } from "@/shared/services/shopRepository";
 
 interface CustomerPanelProps {
   currentUser: User;
@@ -32,6 +32,20 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
     // Lọc ra các đơn hàng của khách hàng hiện tại
     return allOrders.filter((o) => o.customerId === currentUser.id);
   });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    loadOrders().then((allOrders) => {
+      if (!cancelled) {
+        setOrders(allOrders.filter((o) => o.customerId === currentUser.id));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser.id]);
   
   const [activeSubTab, setActiveSubTab] = useState<"orders" | "profile">("orders");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -42,7 +56,7 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
     return order.status === filterStatus;
   });
 
-  const handleCancelOrder = (orderId: string) => {
+  const handleCancelOrder = async (orderId: string) => {
     if (window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?")) {
       const allOrders = getMockOrders();
       const updatedAll = allOrders.map((o) => {
@@ -51,7 +65,7 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
         }
         return o;
       });
-      saveMockOrders(updatedAll);
+      await updateOrderStatus(orderId, "cancelled");
 
       // Cập nhật lại state của trang này
       setOrders(updatedAll.filter((o) => o.customerId === currentUser.id));

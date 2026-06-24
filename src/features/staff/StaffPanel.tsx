@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Package,
   Plus,
@@ -11,9 +11,9 @@ import {
 import {
   User,
   getMockProducts,
-  saveMockProducts,
 } from "@/shared/data/mockDb";
 import { Product, ProductCategory, formatCurrency } from "@/shared/data/products";
+import { getDatabaseModeLabel, loadProducts, saveProducts } from "@/shared/services/shopRepository";
 
 interface StaffPanelProps {
   currentUser: User;
@@ -23,6 +23,20 @@ interface StaffPanelProps {
 
 export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: StaffPanelProps) {
   const [products, setProducts] = useState<Product[]>(() => getMockProducts());
+
+  useEffect(() => {
+    let cancelled = false;
+
+    loadProducts().then((loadedProducts) => {
+      if (!cancelled) {
+        setProducts(loadedProducts);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // State cho Thêm/Sửa Sản phẩm
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -86,7 +100,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
     setIsProductModalOpen(true);
   };
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const colorsArray = productForm.colors.split(",").map((c) => c.trim()).filter(Boolean);
@@ -118,7 +132,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
         return p;
       });
       setProducts(updated);
-      saveMockProducts(updated);
+      await saveProducts(updated);
     } else {
       // Thêm sản phẩm mới
       const newId = productForm.name
@@ -144,7 +158,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
 
       const updated = [newProduct, ...products];
       setProducts(updated);
-      saveMockProducts(updated);
+      await saveProducts(updated);
     }
 
     setIsProductModalOpen(false);
@@ -185,7 +199,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
         <header className="content-header">
           <div>
             <h1>Quản lý sản phẩm (Quyền Nhân viên)</h1>
-            <p>Cho phép thêm, sửa thông tin sản phẩm. Không được phép xóa sản phẩm.</p>
+            <p>Cho phép thêm, sửa thông tin sản phẩm. Database: {getDatabaseModeLabel()}.</p>
           </div>
           <button className="secondary-button" onClick={onNavigateHome}>
             Xem trang bán hàng

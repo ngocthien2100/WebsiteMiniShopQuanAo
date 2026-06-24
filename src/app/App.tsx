@@ -21,13 +21,12 @@ import {
   User,
   Order,
   initMockDb,
-  getMockProducts,
   getLoggedUser,
   getMockUsers,
   setLoggedUser,
   getMockOrders,
-  saveMockOrders,
 } from "@/shared/data/mockDb";
+import { createOrder, loadProducts } from "@/shared/services/shopRepository";
 
 import LoginPage from "@/features/auth/LoginPage";
 import RegisterPage from "@/features/auth/RegisterPage";
@@ -80,20 +79,38 @@ function App() {
 
   // Khởi tạo mock DB và đồng bộ dữ liệu
   useEffect(() => {
+    let cancelled = false;
     initMockDb();
-    setProductsList(getMockProducts());
+    loadProducts().then((loadedProducts) => {
+      if (!cancelled) {
+        setProductsList(loadedProducts);
+      }
+    });
     const logged = getLoggedUser();
     if (logged) {
       setCurrentUser(logged);
       setCustomerName(logged.name);
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Lắng nghe sự thay đổi của trang để cập nhật lại danh sách sản phẩm (ví dụ sau khi Admin/Staff chỉnh sửa)
   useEffect(() => {
+    let cancelled = false;
     if (page === "products" || page === "home" || page === "detail") {
-      setProductsList(getMockProducts());
+      loadProducts().then((loadedProducts) => {
+        if (!cancelled) {
+          setProductsList(loadedProducts);
+        }
+      });
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [page]);
 
   const filteredProducts = useMemo(() => {
@@ -159,7 +176,7 @@ function App() {
   }
 
   // Đặt hàng thực tế & Lưu vào Mock DB
-  function submitOrder(event: FormEvent<HTMLFormElement>) {
+  async function submitOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     // Tạo đơn hàng mới
@@ -176,9 +193,7 @@ function App() {
       createdAt: new Date().toISOString(),
     };
 
-    // Lưu vào Mock DB
-    const allOrders = getMockOrders();
-    saveMockOrders([...allOrders, newOrder]);
+    await createOrder(newOrder);
 
     setCart([]);
     setOrderDone(true);
@@ -271,6 +286,7 @@ function App() {
             {page === "detail" && selectedProduct && (
               <ProductDetailPage
                 product={selectedProduct}
+                productsList={productsList}
                 addToCart={addToCart}
                 openProduct={openProduct}
                 navigate={navigate}
@@ -701,11 +717,13 @@ function ProductsPage({
 
 function ProductDetailPage({
   product,
+  productsList,
   addToCart,
   openProduct,
   navigate,
 }: {
   product: Product;
+  productsList: Product[];
   addToCart: (product: Product, size?: string, color?: string) => void;
   openProduct: (product: Product) => void;
   navigate: (page: Page) => void;
@@ -713,8 +731,6 @@ function ProductDetailPage({
   const [size, setSize] = useState(product.sizes[0]);
   const [color, setColor] = useState(product.colors[0]);
 
-  // Cần lấy danh sách sản phẩm từ localStorage để liên quan hiển thị đúng
-  const productsList = getMockProducts();
   const related = productsList.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 3);
 
   return (

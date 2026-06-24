@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -25,11 +25,16 @@ import {
   getMockUsers,
   saveMockUsers,
   getMockOrders,
-  saveMockOrders,
   getMockProducts,
-  saveMockProducts,
 } from "@/shared/data/mockDb";
 import { Product, ProductCategory, formatCurrency } from "@/shared/data/products";
+import {
+  getDatabaseModeLabel,
+  loadOrders,
+  loadProducts,
+  saveProducts,
+  updateOrderStatus,
+} from "@/shared/services/shopRepository";
 
 // Biểu đồ Recharts đơn giản
 import {
@@ -55,6 +60,21 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
   const [users, setUsers] = useState<User[]>(() => getMockUsers());
   const [orders, setOrders] = useState<Order[]>(() => getMockOrders());
   const [products, setProducts] = useState<Product[]>(() => getMockProducts());
+
+  useEffect(() => {
+    let cancelled = false;
+
+    Promise.all([loadOrders(), loadProducts()]).then(([remoteOrders, remoteProducts]) => {
+      if (!cancelled) {
+        setOrders(remoteOrders);
+        setProducts(remoteProducts);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // State cho Thêm/Sửa Sản phẩm
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -129,10 +149,10 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
   }, [orders]);
 
   // 2. ORDER MANAGEMENT LOGIC
-  const handleUpdateOrderStatus = (orderId: string, status: OrderStatus) => {
+  const handleUpdateOrderStatus = async (orderId: string, status: OrderStatus) => {
     const updated = orders.map((o) => (o.id === orderId ? { ...o, status } : o));
     setOrders(updated);
-    saveMockOrders(updated);
+    await updateOrderStatus(orderId, status);
   };
 
   // 3. PRODUCT CRUD LOGIC
@@ -170,7 +190,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
     setIsProductModalOpen(true);
   };
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const colorsArray = productForm.colors.split(",").map((c) => c.trim()).filter(Boolean);
@@ -202,7 +222,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
         return p;
       });
       setProducts(updated);
-      saveMockProducts(updated);
+      await saveProducts(updated);
     } else {
       // Thêm sản phẩm mới
       const newId = productForm.name
@@ -228,7 +248,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
 
       const updated = [newProduct, ...products];
       setProducts(updated);
-      saveMockProducts(updated);
+      await saveProducts(updated);
     }
 
     setIsProductModalOpen(false);
@@ -239,7 +259,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
     if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
       const updated = products.filter((p) => p.id !== productId);
       setProducts(updated);
-      saveMockProducts(updated);
+      saveProducts(updated);
     }
   };
 
@@ -324,7 +344,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
               {activeTab === "products" && "Danh sách sản phẩm"}
               {activeTab === "users" && "Quản lý tài khoản phân quyền"}
             </h1>
-            <p>Trang quản trị hệ thống bán hàng MiniStyle</p>
+            <p>Trang quản trị hệ thống bán hàng MiniStyle · Database: {getDatabaseModeLabel()}</p>
           </div>
           <button className="secondary-button" onClick={onNavigateHome}>
             Xem trang bán hàng

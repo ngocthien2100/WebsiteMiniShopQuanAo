@@ -29,12 +29,28 @@ VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
 
 Nếu không có biến môi trường này, widget chat sẽ không hiển thị.
 
+## Cấu hình database Supabase
+
+Dự án có lớp dữ liệu cloud-ready bằng Supabase. Khi chưa cấu hình env, app tự dùng `localStorage` để phục vụ demo. Khi có Supabase, sản phẩm và đơn hàng có thể đọc/ghi qua Postgres.
+
+Tạo `.env.local` theo mẫu:
+
+```env
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-public-anon-key
+VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
+```
+
+SQL tạo bảng nằm ở [supabase/schema.sql](./supabase/schema.sql). Hướng dẫn chi tiết: [docs/database-supabase-guide.md](./docs/database-supabase-guide.md).
+
 ## Cấu trúc chính
 
 ```text
 src/
   app/            App shell, routing state, cart, main CSS.
   features/       Các màn hình nghiệp vụ theo vai trò và chatbot package wrapper.
+  shared/services/ Lớp repository đọc/ghi Supabase, có fallback localStorage.
+  shared/supabase/ Cấu hình Supabase client phía frontend.
   shared/data/    Dữ liệu sản phẩm, mock users, mock orders, localStorage helpers.
   styles/         Global CSS, Tailwind entry, theme và fonts.
 ```
@@ -44,6 +60,7 @@ Chi tiết hơn: xem [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 ## Tài liệu liên quan
 
 - [docs/chatbot-n8n-guide.md](./docs/chatbot-n8n-guide.md)
+- [docs/database-supabase-guide.md](./docs/database-supabase-guide.md)
 - [docs/chatbot-test-cases.md](./docs/chatbot-test-cases.md)
 - [docs/prompt-library.md](./docs/prompt-library.md)
 

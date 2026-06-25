@@ -46,6 +46,22 @@ Khi người dùng đăng ký qua Supabase Auth, trigger `on_auth_user_created` 
 
 Trigger `before_profile_update` chặn người dùng thường tự đổi `role` hoặc `status`. Người dùng chỉ nên tự cập nhật các trường hồ sơ như họ tên, số điện thoại, ngày sinh, giới tính và địa chỉ.
 
+## Tạo tài khoản admin đầu tiên
+
+1. Đăng ký tài khoản trên website bằng email thật của bạn.
+2. Vào Supabase `Table Editor` -> `profiles` để kiểm tra profile đã được tạo.
+3. Mở `SQL Editor` và chạy:
+
+```sql
+update public.profiles
+set role = 'admin'
+where email = 'email-cua-ban@example.com';
+```
+
+Sau đó đăng xuất và đăng nhập lại trên website. Tài khoản đó sẽ vào được Admin Portal. Các tài khoản đăng ký mới vẫn mặc định là `customer`; admin có thể đổi role sang `staff` hoặc khóa tài khoản trong màn quản trị.
+
+Nếu Supabase đang bật xác thực email, người dùng phải bấm link xác thực trong email trước khi đăng nhập. Nếu muốn demo nhanh trên lớp, có thể vào `Authentication` -> `Providers` -> `Email` và tắt yêu cầu confirm email.
+
 ## Cấu hình local
 
 Tạo file `.env.local` ở thư mục gốc:
@@ -86,4 +102,4 @@ Chatbot không nên phụ thuộc vào dữ liệu gửi từ frontend. Workflow
 
 ## Giai đoạn tiếp theo
 
-Phần hiện tại đã đưa database cloud vào luồng sản phẩm và đơn hàng. Bước tiếp theo nên làm là chuyển đăng nhập/đăng ký sang Supabase Auth để role `admin/staff/customer` thật sự được bảo vệ bằng tài khoản cloud thay vì tài khoản demo trong `localStorage`.
+Phần hiện tại đã đưa database cloud vào luồng sản phẩm, đơn hàng, đăng ký, đăng nhập và phân quyền hồ sơ. Quick Login vẫn là tài khoản demo local để hỗ trợ chấm điểm nhanh khi chưa tạo tài khoản Supabase mẫu.

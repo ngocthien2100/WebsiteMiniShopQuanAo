@@ -21,12 +21,12 @@ import {
   User,
   Order,
   initMockDb,
-  getLoggedUser,
   getMockUsers,
   setLoggedUser,
   getMockOrders,
 } from "@/shared/data/mockDb";
 import { createOrder, loadProducts } from "@/shared/services/shopRepository";
+import { getCurrentAuthUser, logoutAuthUser } from "@/shared/services/authService";
 
 import LoginPage from "@/features/auth/LoginPage";
 import RegisterPage from "@/features/auth/RegisterPage";
@@ -86,11 +86,12 @@ function App() {
         setProductsList(loadedProducts);
       }
     });
-    const logged = getLoggedUser();
-    if (logged) {
-      setCurrentUser(logged);
-      setCustomerName(logged.name);
-    }
+    getCurrentAuthUser().then((logged) => {
+      if (!cancelled && logged) {
+        setCurrentUser(logged);
+        setCustomerName(logged.name);
+      }
+    });
 
     return () => {
       cancelled = true;
@@ -209,8 +210,8 @@ function App() {
     }, 1500);
   }
 
-  const handleLogout = () => {
-    setLoggedUser(null);
+  const handleLogout = async () => {
+    await logoutAuthUser();
     setCurrentUser(null);
     setCustomerName("");
     navigate("home");

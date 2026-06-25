@@ -175,6 +175,11 @@ security definer
 set search_path = public
 as $$
 begin
+  if current_user in ('postgres', 'service_role', 'supabase_admin') then
+    new.updated_at = now();
+    return new;
+  end if;
+
   if (
     (new.role is distinct from old.role or new.status is distinct from old.status)
     and not public.current_profile_is_admin()

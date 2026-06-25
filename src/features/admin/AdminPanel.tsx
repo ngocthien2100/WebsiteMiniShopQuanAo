@@ -23,7 +23,6 @@ import {
   Order,
   OrderStatus,
   getMockUsers,
-  saveMockUsers,
   getMockOrders,
   getMockProducts,
 } from "@/shared/data/mockDb";
@@ -35,6 +34,7 @@ import {
   saveProducts,
   updateOrderStatus,
 } from "@/shared/services/shopRepository";
+import { loadUsers, updateUserRole, updateUserStatus } from "@/shared/services/authService";
 
 // Biểu đồ Recharts đơn giản
 import {
@@ -64,10 +64,11 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
   useEffect(() => {
     let cancelled = false;
 
-    Promise.all([loadOrders(), loadProducts()]).then(([remoteOrders, remoteProducts]) => {
+    Promise.all([loadOrders(), loadProducts(), loadUsers()]).then(([remoteOrders, remoteProducts, remoteUsers]) => {
       if (!cancelled) {
         setOrders(remoteOrders);
         setProducts(remoteProducts);
+        setUsers(remoteUsers);
       }
     });
 
@@ -264,7 +265,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
   };
 
   // 4. USER MANAGEMENT LOGIC
-  const handleChangeUserRole = (userId: string, role: "admin" | "staff" | "customer") => {
+  const handleChangeUserRole = async (userId: string, role: "admin" | "staff" | "customer") => {
     // Không cho phép tự hạ quyền của chính mình
     if (userId === currentUser.id) {
       alert("Bạn không thể tự thay đổi vai trò của chính mình!");
@@ -272,10 +273,10 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
     }
     const updated = users.map((u) => (u.id === userId ? { ...u, role } : u));
     setUsers(updated);
-    saveMockUsers(updated);
+    await updateUserRole(userId, role);
   };
 
-  const handleToggleUserStatus = (userId: string) => {
+  const handleToggleUserStatus = async (userId: string) => {
     if (userId === currentUser.id) {
       alert("Bạn không thể tự khóa tài khoản của chính mình!");
       return;
@@ -288,7 +289,10 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
       return u;
     });
     setUsers(updated);
-    saveMockUsers(updated);
+    const target = updated.find((user) => user.id === userId);
+    if (target) {
+      await updateUserStatus(userId, target.status);
+    }
   };
 
   return (

@@ -43,6 +43,8 @@ VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
 
 SQL tạo bảng nằm ở [supabase/schema.sql](./supabase/schema.sql). Hướng dẫn chi tiết: [docs/database-supabase-guide.md](./docs/database-supabase-guide.md).
 
+Đăng ký/đăng nhập hiện dùng Supabase Auth khi có env Supabase. Tài khoản mới mặc định là `customer`; tài khoản admin đầu tiên cần được nâng quyền trong Supabase bằng SQL theo hướng dẫn database.
+
 ## Cấu trúc chính
 
 ```text

@@ -1,6 +1,7 @@
 import { useState, FormEvent } from "react";
-import { UserPlus, Key, Mail, User as UserIcon, ShieldAlert, CheckCircle2 } from "lucide-react";
-import { getMockUsers, saveMockUsers, setLoggedUser, User } from "@/shared/data/mockDb";
+import { Calendar, Key, Mail, Phone, User as UserIcon, UserPlus, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { User } from "@/shared/data/mockDb";
+import { registerWithEmail } from "@/shared/services/authService";
 
 interface RegisterPageProps {
   onRegisterSuccess: (user: User) => void;
@@ -15,12 +16,17 @@ export default function RegisterPage({
 }: RegisterPageProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRegister = (e: FormEvent) => {
+  const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -39,36 +45,35 @@ export default function RegisterPage({
       return;
     }
 
-    const users = getMockUsers();
-    const emailExists = users.some(
-      (u) => u.email.toLowerCase() === email.toLowerCase()
-    );
+    setIsSubmitting(true);
+    try {
+      const newUser = await registerWithEmail({
+        name,
+        email,
+        password,
+        phone,
+        birthDate,
+        gender,
+      });
 
-    if (emailExists) {
-      setError("Email này đã được sử dụng bởi một tài khoản khác.");
-      return;
+      setSuccess(true);
+
+      if (newUser) {
+        setSuccessMessage("Đăng ký thành công! Đang tự động đăng nhập...");
+        setTimeout(() => {
+          onRegisterSuccess(newUser);
+        }, 1500);
+      } else {
+        setSuccessMessage("Đăng ký thành công. Vui lòng kiểm tra email xác thực rồi đăng nhập.");
+        setTimeout(() => {
+          onNavigateToLogin();
+        }, 2200);
+      }
+    } catch (registerError) {
+      setError(registerError instanceof Error ? registerError.message : "Không thể đăng ký tài khoản.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const newUser: User = {
-      id: "user-" + Date.now(),
-      name,
-      email,
-      password,
-      role: "customer", // Mặc định khi đăng ký là Customer
-      status: "active",
-      createdAt: new Date().toISOString(),
-    };
-
-    const updatedUsers = [...users, newUser];
-    saveMockUsers(updatedUsers);
-
-    setSuccess(true);
-    
-    // Đăng nhập tự động sau khi đăng ký thành công sau 1.5 giây
-    setTimeout(() => {
-      setLoggedUser(newUser);
-      onRegisterSuccess(newUser);
-    }, 1500);
   };
 
   return (
@@ -90,7 +95,7 @@ export default function RegisterPage({
         {success && (
           <div className="auth-success-box">
             <CheckCircle2 size={18} />
-            <span>Đăng ký thành công! Đang tự động đăng nhập...</span>
+            <span>{successMessage}</span>
           </div>
         )}
 
@@ -128,6 +133,51 @@ export default function RegisterPage({
           </div>
 
           <div className="form-group">
+            <label htmlFor="phone">Số điện thoại</label>
+            <div className="input-wrapper">
+              <Phone size={18} className="input-icon" />
+              <input
+                disabled={success}
+                id="phone"
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="0901234567"
+                type="tel"
+                value={phone}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="birthDate">Ngày sinh</label>
+            <div className="input-wrapper">
+              <Calendar size={18} className="input-icon" />
+              <input
+                disabled={success}
+                id="birthDate"
+                onChange={(e) => setBirthDate(e.target.value)}
+                type="date"
+                value={birthDate}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="gender">Giới tính</label>
+            <select
+              disabled={success}
+              id="gender"
+              onChange={(e) => setGender(e.target.value)}
+              value={gender}
+            >
+              <option value="">Không chọn</option>
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
+              <option value="other">Khác</option>
+              <option value="prefer_not_to_say">Không muốn trả lời</option>
+            </select>
+          </div>
+
+          <div className="form-group">
             <label htmlFor="password">Mật khẩu (tối thiểu 6 ký tự)</label>
             <div className="input-wrapper">
               <Key size={18} className="input-icon" />
@@ -159,8 +209,8 @@ export default function RegisterPage({
             </div>
           </div>
 
-          <button type="submit" className="primary-button auth-submit-btn" disabled={success}>
-            <UserPlus size={18} /> Đăng ký
+          <button type="submit" className="primary-button auth-submit-btn" disabled={success || isSubmitting}>
+            <UserPlus size={18} /> {isSubmitting ? "Đang đăng ký..." : "Đăng ký"}
           </button>
         </form>
 

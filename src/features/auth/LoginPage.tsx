@@ -1,6 +1,7 @@
 import { useState, FormEvent } from "react";
 import { LogIn, Key, Mail, ShieldAlert, UserCheck, Shield } from "lucide-react";
-import { getMockUsers, setLoggedUser, User } from "@/shared/data/mockDb";
+import { User } from "@/shared/data/mockDb";
+import { getDemoUserByRole, loginWithEmail } from "@/shared/services/authService";
 
 interface LoginPageProps {
   onLoginSuccess: (user: User) => void;
@@ -16,8 +17,9 @@ export default function LoginPage({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -26,23 +28,15 @@ export default function LoginPage({
       return;
     }
 
-    const users = getMockUsers();
-    const user = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    );
-
-    if (!user) {
-      setError("Email hoặc mật khẩu không chính xác.");
-      return;
+    setIsSubmitting(true);
+    try {
+      const user = await loginWithEmail(email, password);
+      onLoginSuccess(user);
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : "Không thể đăng nhập.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (user.status === "blocked") {
-      setError("Tài khoản của bạn đã bị khóa bởi Admin.");
-      return;
-    }
-
-    setLoggedUser(user);
-    onLoginSuccess(user);
   };
 
   // Hàm hỗ trợ đăng nhập nhanh phục vụ chấm điểm đồ án
@@ -66,11 +60,11 @@ export default function LoginPage({
     
     // Tự động submit sau một nhịp thở nhỏ của CPU để người dùng nhìn thấy dữ liệu điền
     setTimeout(() => {
-      const users = getMockUsers();
-      const user = users.find((u) => u.email === qEmail && u.password === qPass);
-      if (user && user.status === "active") {
-        setLoggedUser(user);
+      const user = getDemoUserByRole(role);
+      if (user) {
         onLoginSuccess(user);
+      } else {
+        setError("Không tìm thấy tài khoản demo local cho vai trò này.");
       }
     }, 100);
   };
@@ -122,8 +116,8 @@ export default function LoginPage({
             </div>
           </div>
 
-          <button type="submit" className="primary-button auth-submit-btn">
-            <LogIn size={18} /> Đăng nhập
+          <button type="submit" className="primary-button auth-submit-btn" disabled={isSubmitting}>
+            <LogIn size={18} /> {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 

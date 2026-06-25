@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Xác nhận đơn hàng MiniStyle</title>
+  </head>
+  <body style="margin:0;background:#f7f3ea;font-family:Inter,Segoe UI,Arial,sans-serif;color:#17202a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f3ea;padding:28px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#fffdf8;border:1px solid rgba(23,32,42,0.10);border-radius:18px;overflow:hidden;box-shadow:0 20px 50px rgba(23,32,42,0.08);">
+            <tr>
+              <td style="background:#123f36;padding:26px 30px;color:#ffffff;">
+                <div style="display:inline-block;width:44px;height:44px;line-height:44px;text-align:center;border-radius:999px;background:#fffdf8;color:#123f36;font-weight:800;font-size:16px;">MS</div>
+                <h1 style="margin:24px 0 8px;font-size:28px;line-height:1.2;font-weight:800;">Đơn hàng đã được ghi nhận</h1>
+                <p style="margin:0;color:#d7e8e1;font-size:15px;line-height:1.6;">Cảm ơn {{customerName}} đã mua sắm tại MiniStyle.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:30px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#e8f2ed;border-radius:14px;margin-bottom:22px;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <div style="font-size:13px;color:#1f6f5b;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;">Mã đơn hàng</div>
+                      <div style="font-size:24px;font-weight:800;color:#123f36;margin-top:4px;">{{orderId}}</div>
+                    </td>
+                    <td align="right" style="padding:16px 18px;">
+                      <div style="font-size:13px;color:#667085;">Tổng thanh toán</div>
+                      <div style="font-size:22px;font-weight:800;color:#17202a;margin-top:4px;">{{orderTotal}}</div>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#344054;">
+                  MiniStyle đã nhận được đơn hàng của bạn. Nhân viên sẽ kiểm tra và cập nhật trạng thái xử lý trong thời gian sớm nhất.
+                </p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid rgba(23,32,42,0.10);border-radius:14px;overflow:hidden;margin:22px 0;">
+                  <tr>
+                    <td style="padding:14px 16px;background:#fbf8f1;font-weight:800;color:#17202a;">Thông tin giao hàng</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:16px;color:#344054;font-size:14px;line-height:1.7;">
+                      <strong>Người nhận:</strong> {{customerName}}<br />
+                      <strong>Số điện thoại:</strong> {{phone}}<br />
+                      <strong>Địa chỉ:</strong> {{address}}<br />
+                      <strong>Ghi chú:</strong> {{notes}}
+                    </td>
+                  </tr>
+                </table>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid rgba(23,32,42,0.10);border-radius:14px;overflow:hidden;margin:22px 0;">
+                  <tr>
+                    <td style="padding:14px 16px;background:#fbf8f1;font-weight:800;color:#17202a;">Sản phẩm</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:16px;color:#344054;font-size:14px;line-height:1.7;">
+                      {{itemsHtml}}
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#667085;">
+                  Nếu thông tin đơn hàng chưa đúng, vui lòng phản hồi sớm để MiniStyle hỗ trợ điều chỉnh trước khi giao hàng.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 30px;background:#fbf8f1;border-top:1px solid rgba(23,32,42,0.08);color:#667085;font-size:12px;line-height:1.6;">
+                MiniStyle - Clothing shop. Email tự động từ hệ thống xử lý đơn hàng.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

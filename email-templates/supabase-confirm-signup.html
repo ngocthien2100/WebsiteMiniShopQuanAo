@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Xác thực tài khoản MiniStyle</title>
+  </head>
+  <body style="margin:0;background:#f7f3ea;font-family:Inter,Segoe UI,Arial,sans-serif;color:#17202a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f3ea;padding:28px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fffdf8;border:1px solid rgba(23,32,42,0.10);border-radius:18px;overflow:hidden;box-shadow:0 20px 50px rgba(23,32,42,0.08);">
+            <tr>
+              <td style="background:#123f36;padding:26px 30px;color:#ffffff;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="vertical-align:middle;">
+                      <div style="display:inline-block;width:44px;height:44px;line-height:44px;text-align:center;border-radius:999px;background:#fffdf8;color:#123f36;font-weight:800;font-size:16px;">MS</div>
+                    </td>
+                    <td align="right" style="vertical-align:middle;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#e8f2ed;">MiniStyle</td>
+                  </tr>
+                </table>
+                <h1 style="margin:24px 0 8px;font-size:28px;line-height:1.2;font-weight:800;">Xác thực tài khoản của bạn</h1>
+                <p style="margin:0;color:#d7e8e1;font-size:15px;line-height:1.6;">Chỉ còn một bước để hoàn tất đăng ký và bắt đầu mua sắm tại MiniStyle.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:30px;">
+                <p style="margin:0 0 14px;font-size:16px;line-height:1.7;">Chào bạn,</p>
+                <p style="margin:0 0 22px;font-size:16px;line-height:1.7;color:#344054;">
+                  Cảm ơn bạn đã tạo tài khoản MiniStyle bằng email <strong>{{ .Email }}</strong>. Vui lòng bấm nút bên dưới để xác thực tài khoản.
+                </p>
+                <div style="text-align:center;margin:30px 0;">
+                  <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#123f36;color:#ffffff;text-decoration:none;padding:14px 24px;border-radius:999px;font-weight:800;font-size:15px;box-shadow:0 12px 24px rgba(18,63,54,0.20);">Xác thực tài khoản</a>
+                </div>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#e8f2ed;border-radius:14px;margin:24px 0;">
+                  <tr>
+                    <td style="padding:16px 18px;color:#123f36;font-size:14px;line-height:1.6;">
+                      Nếu bạn không đăng ký tài khoản MiniStyle, bạn có thể bỏ qua email này. Liên kết xác thực sẽ hết hạn theo cấu hình bảo mật của Supabase.
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#667085;">
+                  Nếu nút không hoạt động, hãy copy liên kết này và mở trong trình duyệt:<br />
+                  <span style="word-break:break-all;color:#1f6f5b;">{{ .ConfirmationURL }}</span>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 30px;background:#fbf8f1;border-top:1px solid rgba(23,32,42,0.08);color:#667085;font-size:12px;line-height:1.6;">
+                MiniStyle - Clothing shop. Email tự động, vui lòng không trả lời trực tiếp email này.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -47,6 +47,8 @@ SQL tạo bảng nằm ở [supabase/schema.sql](./supabase/schema.sql). Hướn
 
 Supabase Auth cũng xử lý xác thực email, đổi mật khẩu và quên mật khẩu. Cần cấu hình `Authentication -> URL Configuration` trong Supabase để redirect về domain Netlify và `/?auth=reset-password`.
 
+Các mẫu email HTML theo phong cách MiniStyle nằm trong [email-templates](./email-templates) và hướng dẫn sử dụng ở [docs/email-template-guide.md](./docs/email-template-guide.md).
+
 ## Cấu trúc chính
 
 ```text
@@ -65,6 +67,7 @@ Chi tiết hơn: xem [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 
 - [docs/chatbot-n8n-guide.md](./docs/chatbot-n8n-guide.md)
 - [docs/database-supabase-guide.md](./docs/database-supabase-guide.md)
+- [docs/email-template-guide.md](./docs/email-template-guide.md)
 - [docs/chatbot-test-cases.md](./docs/chatbot-test-cases.md)
 - [docs/prompt-library.md](./docs/prompt-library.md)
 

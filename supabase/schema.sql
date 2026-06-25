@@ -4,9 +4,50 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text not null unique,
   full_name text not null,
+  phone text,
+  birth_date date,
+  gender text check (gender in ('male', 'female', 'other', 'prefer_not_to_say')),
+  default_shipping_address text,
   role text not null default 'customer' check (role in ('admin', 'staff', 'customer')),
   status text not null default 'active' check (status in ('active', 'blocked')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.profiles add column if not exists phone text;
+alter table public.profiles add column if not exists birth_date date;
+alter table public.profiles add column if not exists gender text;
+alter table public.profiles add column if not exists default_shipping_address text;
+alter table public.profiles add column if not exists updated_at timestamptz not null default now();
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'profiles_gender_check'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_gender_check
+      check (gender in ('male', 'female', 'other', 'prefer_not_to_say'));
+  end if;
+end;
+$$;
+
+create table if not exists public.customer_addresses (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  recipient_name text not null,
+  phone text not null,
+  address_line text not null,
+  ward text,
+  district text,
+  province text,
+  note text,
+  is_default boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table if not exists public.products (
@@ -56,11 +97,150 @@ create table if not exists public.shop_policies (
   updated_at timestamptz not null default now()
 );
 
+create or replace function public.current_profile_role()
+returns text
+language sql
+security definer
+set search_path = public
+as $$
+  select role from public.profiles where id = auth.uid() and status = 'active';
+$$;
+
+create or replace function public.current_profile_is_staff()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(public.current_profile_role() in ('admin', 'staff'), false);
+$$;
+
+create or replace function public.current_profile_is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(public.current_profile_role() = 'admin', false);
+$$;
+
+create or replace function public.handle_new_auth_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (
+    id,
+    email,
+    full_name,
+    phone,
+    birth_date,
+    gender,
+    role,
+    status
+  )
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name', 'Khách hàng MiniStyle'),
+    new.raw_user_meta_data ->> 'phone',
+    nullif(new.raw_user_meta_data ->> 'birth_date', '')::date,
+    nullif(new.raw_user_meta_data ->> 'gender', ''),
+    'customer',
+    'active'
+  )
+  on conflict (id) do update set
+    email = excluded.email,
+    full_name = excluded.full_name,
+    phone = excluded.phone,
+    birth_date = excluded.birth_date,
+    gender = excluded.gender,
+    updated_at = now();
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_auth_user();
+
+create or replace function public.prevent_profile_privilege_escalation()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if (
+    (new.role is distinct from old.role or new.status is distinct from old.status)
+    and not public.current_profile_is_admin()
+  ) then
+    raise exception 'Only admins can change profile role or status';
+  end if;
+
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists before_profile_update on public.profiles;
+create trigger before_profile_update
+  before update on public.profiles
+  for each row execute function public.prevent_profile_privilege_escalation();
+
 alter table public.profiles enable row level security;
+alter table public.customer_addresses enable row level security;
 alter table public.products enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 alter table public.shop_policies enable row level security;
+
+grant usage on schema public to anon, authenticated;
+grant select on public.products to anon, authenticated;
+grant select on public.shop_policies to anon, authenticated;
+grant insert on public.orders to anon, authenticated;
+grant insert on public.order_items to anon, authenticated;
+grant select, update on public.profiles to authenticated;
+grant select, insert, update, delete on public.customer_addresses to authenticated;
+grant select, insert, update on public.orders to authenticated;
+grant select, insert on public.order_items to authenticated;
+
+drop policy if exists "Users can read own profile" on public.profiles;
+create policy "Users can read own profile"
+  on public.profiles for select
+  using (id = auth.uid());
+
+drop policy if exists "Users can update own profile" on public.profiles;
+create policy "Users can update own profile"
+  on public.profiles for update
+  using (id = auth.uid())
+  with check (id = auth.uid());
+
+drop policy if exists "Users can read own addresses" on public.customer_addresses;
+create policy "Users can read own addresses"
+  on public.customer_addresses for select
+  using (user_id = auth.uid());
+
+drop policy if exists "Users can manage own addresses" on public.customer_addresses;
+create policy "Users can manage own addresses"
+  on public.customer_addresses for all
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+drop policy if exists "Admins can read all profiles" on public.profiles;
+create policy "Admins can read all profiles"
+  on public.profiles for select
+  using (public.current_profile_is_admin());
+
+drop policy if exists "Admins can update profile roles and status" on public.profiles;
+create policy "Admins can update profile roles and status"
+  on public.profiles for update
+  using (public.current_profile_is_admin())
+  with check (public.current_profile_is_admin());
 
 drop policy if exists "Anyone can read active products" on public.products;
 create policy "Anyone can read active products"
@@ -85,54 +265,19 @@ create policy "Public visitors can create order items"
 drop policy if exists "Authenticated staff can manage products" on public.products;
 create policy "Authenticated staff can manage products"
   on public.products for all
-  using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid()
-        and profiles.status = 'active'
-        and profiles.role in ('admin', 'staff')
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid()
-        and profiles.status = 'active'
-        and profiles.role in ('admin', 'staff')
-    )
-  );
+  using (public.current_profile_is_staff())
+  with check (public.current_profile_is_staff());
 
 drop policy if exists "Authenticated staff can read orders" on public.orders;
 create policy "Authenticated staff can read orders"
   on public.orders for select
-  using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid()
-        and profiles.status = 'active'
-        and profiles.role in ('admin', 'staff')
-    )
-  );
+  using (public.current_profile_is_staff());
 
 drop policy if exists "Authenticated staff can update orders" on public.orders;
 create policy "Authenticated staff can update orders"
   on public.orders for update
-  using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid()
-        and profiles.status = 'active'
-        and profiles.role in ('admin', 'staff')
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid()
-        and profiles.status = 'active'
-        and profiles.role in ('admin', 'staff')
-    )
-  );
+  using (public.current_profile_is_staff())
+  with check (public.current_profile_is_staff());
 
 insert into public.shop_policies (key, content) values
   ('delivery', 'Giao hàng toàn quốc từ 2-4 ngày làm việc. Miễn phí vận chuyển cho đơn từ 500.000đ.'),

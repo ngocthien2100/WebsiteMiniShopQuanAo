@@ -25,11 +25,26 @@ Supabase được chọn vì một project có sẵn Postgres database, Auth, St
 
 Các bảng chính:
 
-- `profiles`: hồ sơ người dùng, role `admin | staff | customer`, trạng thái tài khoản.
+- `profiles`: hồ sơ người dùng, họ tên, email, số điện thoại, ngày sinh, giới tính, địa chỉ giao hàng mặc định, role `admin | staff | customer`, trạng thái tài khoản.
+- `customer_addresses`: danh sách địa chỉ giao hàng của từng khách hàng.
 - `products`: sản phẩm quần áo, danh mục, giá, ảnh, size, màu, tags.
 - `orders`: đơn hàng.
 - `order_items`: chi tiết sản phẩm trong đơn hàng.
 - `shop_policies`: chính sách giao hàng, đổi trả, hướng dẫn đặt hàng.
+
+## Tài khoản, mật khẩu và phân quyền
+
+Không tạo bảng riêng để lưu mật khẩu. Với hệ thống deploy thật, mật khẩu phải để Supabase Auth quản lý trong schema nội bộ `auth`, bao gồm đăng ký, đăng nhập, hash mật khẩu, đổi mật khẩu và xác thực email.
+
+Thiết kế đúng trong dự án:
+
+- `auth.users`: bảng nội bộ của Supabase Auth, lưu tài khoản đăng nhập và mật khẩu đã hash. Không truy cập trực tiếp từ frontend.
+- `public.profiles`: bảng hồ sơ mở rộng, liên kết với `auth.users.id`, lưu họ tên, số điện thoại, ngày sinh, giới tính, địa chỉ mặc định, role và trạng thái.
+- `public.customer_addresses`: lưu nhiều địa chỉ giao hàng nếu khách có nhiều nơi nhận hàng.
+
+Khi người dùng đăng ký qua Supabase Auth, trigger `on_auth_user_created` sẽ tự tạo một dòng trong `profiles` với role mặc định là `customer`. Admin/staff không được tự đăng ký bằng metadata; quyền cao hơn phải được admin cập nhật sau.
+
+Trigger `before_profile_update` chặn người dùng thường tự đổi `role` hoặc `status`. Người dùng chỉ nên tự cập nhật các trường hồ sơ như họ tên, số điện thoại, ngày sinh, giới tính và địa chỉ.
 
 ## Cấu hình local
 

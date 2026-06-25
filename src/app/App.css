@@ -8,13 +8,15 @@
   --brand-dark: #123f36;
   --accent: #b36b3f;
   --soft: #e8f2ed;
+  --font-body: "General Sans", "Satoshi", "Avenir Next", "Segoe UI", Arial, sans-serif;
+  --font-display: "Editorial New", "Didot", "Bodoni 72", "Bodoni MT", Georgia, serif;
   background:
     radial-gradient(circle at top left, rgba(31, 111, 91, 0.12), transparent 28rem),
     linear-gradient(180deg, #fbf8f1 0%, var(--bg) 45%, #fff 100%);
   background-size: 120% 120%, 100% 100%;
   animation: ambientBackground 14s ease-in-out infinite alternate;
   color: var(--ink);
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-body);
   min-height: 100vh;
 }
 
@@ -120,6 +122,12 @@
   display: block;
 }
 
+.brand strong {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+}
+
 .brand small {
   color: var(--muted);
   font-size: 12px;
@@ -204,9 +212,9 @@
 .hero-copy h1,
 .page-title-row h1,
 .detail-info h1 {
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(42px, 6vw, 76px);
-  font-weight: 800;
+  font-weight: 300;
   letter-spacing: 0;
   line-height: 1.02;
   margin: 0;
@@ -381,9 +389,9 @@
 .section-heading h2,
 .checkout-form h2,
 .site-footer h2 {
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(28px, 3vw, 40px);
-  font-weight: 800;
+  font-weight: 300;
   line-height: 1.15;
   margin: 0;
 }
@@ -824,7 +832,7 @@
   --chat--color--secondary: var(--brand);
   --chat--color-secondary-shade-50: var(--brand-dark);
   --chat--border-radius: 16px;
-  --chat--font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  --chat--font-family: var(--font-body);
   --chat--window--width: min(410px, calc(100vw - 32px));
   --chat--window--height: min(560px, calc(100vh - 120px));
   --chat--window--bottom: 22px;

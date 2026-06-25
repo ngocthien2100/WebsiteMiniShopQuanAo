@@ -64,6 +64,13 @@ const categories: { value: "all" | ProductCategory; label: string }[] = [
   { value: "phu-kien", label: "Phụ kiện" },
 ];
 
+const categoryStories: Record<ProductCategory, string> = {
+  ao: "Layering gọn gàng cho lịch học, đi làm và cuối tuần.",
+  quan: "Phom dễ mặc, cân bằng giữa thoải mái và chỉn chu.",
+  vay: "Các dáng váy mềm, nhẹ, hợp cafe, đi học và hẹn gặp.",
+  "phu-kien": "Điểm nhấn nhỏ giúp outfit có cá tính hơn.",
+};
+
 const pageVariants = {
   initial: { opacity: 0, y: 18, filter: "blur(8px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
@@ -446,31 +453,37 @@ function Header({
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <header className="site-header">
-      <button className="brand" onClick={() => navigate("home")} type="button">
-        <span className="brand-mark">MS</span>
-        <span>
-          <strong>MiniStyle</strong>
-          <small>Clothing shop</small>
-        </span>
-      </button>
+    <>
+      <div className="atelier-bar">
+        <span>MiniStyle Studio</span>
+        <span>Freeship đơn từ 500.000đ</span>
+        <span>Đổi size trong 7 ngày</span>
+      </div>
+      <header className="site-header">
+        <button className="brand" onClick={() => navigate("home")} type="button">
+          <span className="brand-mark">MS</span>
+          <span>
+            <strong>MiniStyle</strong>
+            <small>Curated daily wear</small>
+          </span>
+        </button>
 
-      <nav className="main-nav">
-        {[
-          ["home", "Trang chủ"],
-          ["products", "Sản phẩm"],
-          ["cart", "Giỏ hàng"],
-        ].map(([id, label]) => (
-          <button
-            className={page === id ? "active" : ""}
-            key={id}
-            onClick={() => navigate(id as Page)}
-            type="button"
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
+        <nav className="main-nav" aria-label="Điều hướng chính">
+          {[
+            ["home", "Trang chủ"],
+            ["products", "Bộ sưu tập"],
+            ["cart", "Giỏ hàng"],
+          ].map(([id, label]) => (
+            <button
+              className={page === id ? "active" : ""}
+              key={id}
+              onClick={() => navigate(id as Page)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
 
       <div className="header-actions">
         <button className="cart-button" onClick={() => navigate("cart")} type="button">
@@ -531,8 +544,9 @@ function Header({
             <UserIcon size={16} /> Đăng nhập
           </button>
         )}
-      </div>
-    </header>
+        </div>
+      </header>
+    </>
   );
 }
 
@@ -559,19 +573,24 @@ function HomePage({
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           variants={revealVariants}
         >
-          <p className="eyebrow">Bộ sưu tập mini cho sinh viên</p>
-          <h1>Nâng tầm phong cách mỗi ngày</h1>
+          <p className="eyebrow">MiniStyle Spring Edit</p>
+          <h1>Daily wear, styled with intention.</h1>
           <p>
-            MiniStyle gợi ý các item dễ mặc, giá hợp lý và có chatbot tư vấn theo nhu cầu,
-            ngân sách, danh mục sản phẩm.
+            Tuyển chọn các item dễ mặc cho sinh viên và người đi làm trẻ: rõ phom,
+            dễ phối, có dữ liệu sản phẩm thật và chatbot tư vấn theo ngữ cảnh mua sắm.
           </p>
           <div className="hero-actions">
             <button className="primary-button" onClick={() => navigate("products")} type="button">
-              Mua ngay <ChevronRight size={18} />
+              Khám phá bộ sưu tập <ChevronRight size={18} />
             </button>
             <button className="secondary-button" onClick={() => navigate("products")} type="button">
-              Xem bộ sưu tập
+              Tư vấn outfit
             </button>
+          </div>
+          <div className="hero-metrics" aria-label="Điểm nổi bật MiniStyle">
+            <span><strong>{productsList.length}</strong>Sản phẩm</span>
+            <span><strong>3</strong>Vai trò</span>
+            <span><strong>AI</strong>Tư vấn</span>
           </div>
         </motion.div>
         <motion.div
@@ -592,15 +611,22 @@ function HomePage({
             transition={{ delay: 0.55, duration: 0.4 }}
           >
             <Sparkles size={18} />
-            Hệ thống phân quyền & Chatbot tư vấn sẵn sàng!
+            Auth, database & chatbot đã sẵn sàng
           </motion.div>
         </motion.div>
       </section>
 
+      <section className="editorial-strip" aria-label="Điểm nhấn trải nghiệm">
+        <span>New arrivals</span>
+        <span>Campus essentials</span>
+        <span>Smart casual</span>
+        <span>Accessories edit</span>
+      </section>
+
       <section className="section">
         <SectionHeading
-          title="Danh mục nổi bật"
-          description="Bố cục rõ ràng để người xem demo hiểu nhanh shop đang bán gì."
+          title="Shop by edit"
+          description="Danh mục được viết theo nhu cầu phối đồ để người dùng chọn nhanh hơn."
         />
         <div className="category-grid">
           {categories.slice(1).map((item, index) => (
@@ -617,7 +643,10 @@ function HomePage({
               whileInView="visible"
               whileTap={{ scale: 0.98 }}
             >
-              <span>{item.label}</span>
+              <span>
+                <strong>{item.label}</strong>
+                <small>{categoryStories[item.value as ProductCategory]}</small>
+              </span>
               <ChevronRight size={18} />
             </motion.button>
           ))}
@@ -626,8 +655,8 @@ function HomePage({
 
       <section className="section">
         <SectionHeading
-          title="Sản phẩm bán chạy"
-          description="Các sản phẩm mẫu dùng chung cho website, chatbot và bảng kiểm thử."
+          title="Curated pieces"
+          description="Product card được tối giản để ảnh, tên, giá và lựa chọn mua nổi bật hơn."
         />
         <div className="product-grid">
           {featured.map((product) => (
@@ -691,8 +720,8 @@ function ProductsPage({
       <div className="page-title-row">
         <div>
           <p className="eyebrow">Danh sách sản phẩm</p>
-          <h1>Sản phẩm MiniStyle</h1>
-          <p>Hiển thị {products.length} sản phẩm trong hệ thống.</p>
+          <h1>Collection</h1>
+          <p>{products.length} sản phẩm đang hiển thị, đồng bộ từ hệ thống dữ liệu của shop.</p>
         </div>
         <div className="search-box">
           <Search size={18} />
@@ -708,7 +737,7 @@ function ProductsPage({
         <aside className="filters-panel">
           <div className="filter-title">
             <SlidersHorizontal size={18} />
-            Bộ lọc
+            Refine
           </div>
 
           <label>
@@ -738,28 +767,34 @@ function ProductsPage({
           </label>
 
           <div className="policy-box">
-            <strong>Dữ liệu phân quyền</strong>
-            <p>Admin và Staff có thể thêm, chỉnh sửa sản phẩm và sự thay đổi sẽ xuất hiện ngay tại đây.</p>
+            <strong>Live catalog</strong>
+            <p>Admin và Staff chỉnh sửa sản phẩm, catalog cập nhật lại trên storefront sau khi reload dữ liệu.</p>
           </div>
         </aside>
 
-        <div className="product-grid catalog-grid">
-          {products.length > 0 ? (
-            products.map((product) => (
-              <ProductCard
-                addToCart={addToCart}
-                key={product.id}
-                openProduct={openProduct}
-                product={product}
-              />
-            ))
-          ) : (
-            <div className="empty-state">
-              <Search size={24} />
-              <h3>Không tìm thấy sản phẩm</h3>
-              <p>Thử đổi danh mục, từ khóa hoặc tăng khoảng giá.</p>
-            </div>
-          )}
+        <div className="catalog-results">
+          <div className="catalog-toolbar">
+            <span>{products.length} items</span>
+            <span>Sort by editorial relevance</span>
+          </div>
+          <div className="product-grid catalog-grid">
+            {products.length > 0 ? (
+              products.map((product) => (
+                <ProductCard
+                  addToCart={addToCart}
+                  key={product.id}
+                  openProduct={openProduct}
+                  product={product}
+                />
+              ))
+            ) : (
+              <div className="empty-state">
+                <Search size={24} />
+                <h3>Không tìm thấy sản phẩm</h3>
+                <p>Thử đổi danh mục, từ khóa hoặc tăng khoảng giá.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -1028,11 +1063,16 @@ function ProductCard({
       <button className="product-image" onClick={() => openProduct(product)} type="button">
         {product.badge && <span className="badge">{product.badge}</span>}
         <img alt={product.name} src={product.image} />
+        <span className="image-quick-view">Xem chi tiết</span>
       </button>
       <div className="product-body">
         <span>{product.categoryLabel}</span>
         <h3>{product.name}</h3>
         <p>{product.shortDescription}</p>
+        <div className="product-meta-row">
+          <span>{product.colors.slice(0, 3).join(" / ")}</span>
+          <span>{product.sizes.slice(0, 3).join(", ")}</span>
+        </div>
         <div className="product-footer">
           <strong>{formatCurrency(product.price)}</strong>
           <button onClick={() => addToCart(product)} type="button">
@@ -1061,7 +1101,7 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
     <footer className="site-footer">
       <div>
         <h2>MiniStyle</h2>
-        <p>Website bán hàng mini tích hợp chatbot tư vấn sản phẩm qua N8N.</p>
+        <p>Website bán hàng mini theo hướng fashion commerce, có Supabase Auth, database và chatbot tư vấn qua n8n.</p>
       </div>
       <div>
         <strong>Liên kết</strong>

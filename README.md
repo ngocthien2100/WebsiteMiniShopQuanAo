@@ -71,6 +71,7 @@ Chi tiết hơn: xem [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 - [docs/database-supabase-guide.md](./docs/database-supabase-guide.md)
 - [docs/email-template-guide.md](./docs/email-template-guide.md)
 - [docs/font-guide.md](./docs/font-guide.md)
+- [docs/ui-ux-improvement-notes.md](./docs/ui-ux-improvement-notes.md)
 - [docs/chatbot-test-cases.md](./docs/chatbot-test-cases.md)
 - [docs/prompt-library.md](./docs/prompt-library.md)
 

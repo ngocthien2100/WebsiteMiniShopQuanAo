@@ -175,7 +175,7 @@ security definer
 set search_path = public
 as $$
 begin
-  if current_user in ('postgres', 'service_role', 'supabase_admin') then
+  if auth.uid() is null or current_user in ('postgres', 'service_role', 'supabase_admin') then
     new.updated_at = now();
     return new;
   end if;

@@ -45,6 +45,8 @@ SQL tạo bảng nằm ở [supabase/schema.sql](./supabase/schema.sql). Hướn
 
 Đăng ký/đăng nhập hiện dùng Supabase Auth khi có env Supabase. Tài khoản mới mặc định là `customer`; tài khoản admin đầu tiên cần được nâng quyền trong Supabase bằng SQL theo hướng dẫn database.
 
+Supabase Auth cũng xử lý xác thực email, đổi mật khẩu và quên mật khẩu. Cần cấu hình `Authentication -> URL Configuration` trong Supabase để redirect về domain Netlify và `/?auth=reset-password`.
+
 ## Cấu trúc chính
 
 ```text

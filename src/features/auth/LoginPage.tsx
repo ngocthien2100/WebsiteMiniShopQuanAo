@@ -5,12 +5,14 @@ import { getDemoUserByRole, loginWithEmail } from "@/shared/services/authService
 
 interface LoginPageProps {
   onLoginSuccess: (user: User) => void;
+  onNavigateToForgotPassword: () => void;
   onNavigateToRegister: () => void;
   onNavigateHome: () => void;
 }
 
 export default function LoginPage({
   onLoginSuccess,
+  onNavigateToForgotPassword,
   onNavigateToRegister,
   onNavigateHome,
 }: LoginPageProps) {
@@ -120,6 +122,12 @@ export default function LoginPage({
             <LogIn size={18} /> {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
+
+        <div className="auth-helper-actions">
+          <button className="text-button inline-btn" onClick={onNavigateToForgotPassword} type="button">
+            Quên mật khẩu?
+          </button>
+        </div>
 
         <div className="auth-footer">
           Chưa có tài khoản?{" "}

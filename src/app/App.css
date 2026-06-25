@@ -1058,6 +1058,12 @@
   min-height: 44px;
 }
 
+.auth-helper-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
 .auth-footer {
   text-align: center;
   margin-top: 20px;

@@ -4,6 +4,7 @@ import {
   Bot,
   Check,
   ChevronRight,
+  Key,
   Minus,
   Plus,
   Search,
@@ -30,6 +31,9 @@ import { getCurrentAuthUser, logoutAuthUser } from "@/shared/services/authServic
 
 import LoginPage from "@/features/auth/LoginPage";
 import RegisterPage from "@/features/auth/RegisterPage";
+import ForgotPasswordPage from "@/features/auth/ForgotPasswordPage";
+import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
+import ChangePasswordPage from "@/features/auth/ChangePasswordPage";
 import AdminPanel from "@/features/admin/AdminPanel";
 import StaffPanel from "@/features/staff/StaffPanel";
 import CustomerPanel from "@/features/customer/CustomerPanel";
@@ -37,7 +41,19 @@ import N8nChatWidget from "@/features/chatbot/N8nChatWidget";
 
 import "./App.css";
 
-type Page = "home" | "products" | "detail" | "cart" | "login" | "register" | "admin" | "staff" | "customer";
+type Page =
+  | "home"
+  | "products"
+  | "detail"
+  | "cart"
+  | "login"
+  | "register"
+  | "forgot-password"
+  | "reset-password"
+  | "change-password"
+  | "admin"
+  | "staff"
+  | "customer";
 type CartItem = { product: Product; quantity: number; size: string; color: string };
 
 const categories: { value: "all" | ProductCategory; label: string }[] = [
@@ -81,6 +97,12 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     initMockDb();
+
+    const authMode = new URLSearchParams(window.location.search).get("auth");
+    if (authMode === "reset-password") {
+      setPage("reset-password");
+    }
+
     loadProducts().then((loadedProducts) => {
       if (!cancelled) {
         setProductsList(loadedProducts);
@@ -247,6 +269,7 @@ function App() {
           navigate={navigate} 
           currentUser={currentUser}
           onLogout={handleLogout}
+          onNavigateToChangePassword={() => navigate("change-password")}
         />
       )}
 
@@ -318,6 +341,7 @@ function App() {
             {page === "login" && (
               <LoginPage
                 onLoginSuccess={handleLoginSuccess}
+                onNavigateToForgotPassword={() => navigate("forgot-password")}
                 onNavigateToRegister={() => navigate("register")}
                 onNavigateHome={() => navigate("home")}
               />
@@ -327,6 +351,27 @@ function App() {
               <RegisterPage
                 onRegisterSuccess={handleRegisterSuccess}
                 onNavigateToLogin={() => navigate("login")}
+                onNavigateHome={() => navigate("home")}
+              />
+            )}
+
+            {page === "forgot-password" && (
+              <ForgotPasswordPage
+                onNavigateToLogin={() => navigate("login")}
+                onNavigateHome={() => navigate("home")}
+              />
+            )}
+
+            {page === "reset-password" && (
+              <ResetPasswordPage
+                onNavigateToLogin={() => navigate("login")}
+                onNavigateHome={() => navigate("home")}
+              />
+            )}
+
+            {page === "change-password" && currentUser && (
+              <ChangePasswordPage
+                currentUser={currentUser}
                 onNavigateHome={() => navigate("home")}
               />
             )}
@@ -389,12 +434,14 @@ function Header({
   navigate,
   currentUser,
   onLogout,
+  onNavigateToChangePassword,
 }: {
   page: Page;
   cartQuantity: number;
   navigate: (page: Page) => void;
   currentUser: User | null;
   onLogout: () => void;
+  onNavigateToChangePassword: () => void;
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -468,6 +515,9 @@ function Header({
                 )}
                 <button onClick={() => { navigate("customer"); setDropdownOpen(false); }}>
                   <UserIcon size={16} /> Trang cá nhân
+                </button>
+                <button onClick={() => { onNavigateToChangePassword(); setDropdownOpen(false); }}>
+                  <Key size={16} /> Đổi mật khẩu
                 </button>
                 <hr />
                 <button className="dropdown-logout" onClick={() => { onLogout(); setDropdownOpen(false); }}>

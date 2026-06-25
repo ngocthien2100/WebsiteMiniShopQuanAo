@@ -62,6 +62,34 @@ Sau đó đăng xuất và đăng nhập lại trên website. Tài khoản đó 
 
 Nếu Supabase đang bật xác thực email, người dùng phải bấm link xác thực trong email trước khi đăng nhập. Nếu muốn demo nhanh trên lớp, có thể vào `Authentication` -> `Providers` -> `Email` và tắt yêu cầu confirm email.
 
+## Cấu hình xác thực email và quên mật khẩu
+
+Trong Supabase Dashboard, vào `Authentication` -> `URL Configuration`.
+
+Thiết lập:
+
+```text
+Site URL: https://websiteminishopquanao.netlify.app
+```
+
+Thêm `Redirect URLs`:
+
+```text
+https://websiteminishopquanao.netlify.app
+https://websiteminishopquanao.netlify.app/?auth=reset-password
+http://localhost:5173
+http://localhost:5173/?auth=reset-password
+```
+
+Luồng đang dùng trong code:
+
+- Đăng ký: `supabase.auth.signUp()` gửi email xác thực nếu Supabase bật confirm email.
+- Đăng nhập: `supabase.auth.signInWithPassword()`.
+- Quên mật khẩu: `supabase.auth.resetPasswordForEmail()` gửi link về `/?auth=reset-password`.
+- Đặt lại/đổi mật khẩu: `supabase.auth.updateUser({ password })`.
+
+Email xác thực và email quên mật khẩu sẽ được Supabase gửi tới địa chỉ Gmail/email mà người dùng nhập. Nếu muốn email gửi bằng domain riêng hoặc Gmail SMTP riêng, cấu hình thêm ở `Authentication` -> `SMTP Settings`.
+
 ## Cấu hình local
 
 Tạo file `.env.local` ở thư mục gốc:

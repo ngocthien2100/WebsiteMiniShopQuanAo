@@ -138,6 +138,7 @@ export async function registerWithEmail(payload: RegisterPayload): Promise<User 
     email: payload.email,
     password: payload.password,
     options: {
+      emailRedirectTo: window.location.origin,
       data: {
         full_name: payload.name,
         phone: payload.phone || null,
@@ -162,6 +163,31 @@ export async function registerWithEmail(payload: RegisterPayload): Promise<User 
   }
 
   return loadProfile(data.user.id);
+}
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Chức năng quên mật khẩu cần cấu hình Supabase.");
+  }
+
+  const redirectTo = `${window.location.origin}/?auth=reset-password`;
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateCurrentPassword(newPassword: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Chức năng đổi mật khẩu cần cấu hình Supabase.");
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }
 
 export async function logoutAuthUser() {

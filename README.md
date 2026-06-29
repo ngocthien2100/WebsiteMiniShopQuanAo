@@ -17,6 +17,80 @@ Build production:
 npm run build
 ```
 
+## Deploy trên Vercel cho tài khoản khác
+
+Phần này dành cho người pull/fork repo và deploy bằng tài khoản Vercel riêng.
+
+### 1. Chuẩn bị project Supabase
+
+1. Tạo một project mới trên [Supabase](https://supabase.com).
+2. Vào `SQL Editor`.
+3. Copy toàn bộ nội dung file [supabase/schema.sql](./supabase/schema.sql) và chạy một lần.
+4. Vào `Project Settings -> API` để lấy:
+   - `Project URL` -> dùng cho `VITE_SUPABASE_URL`
+   - `anon public key` -> dùng cho `VITE_SUPABASE_ANON_KEY`
+
+Không đưa `service_role key` vào Vercel hoặc frontend.
+
+### 2. Deploy bằng Vercel
+
+1. Đăng nhập [Vercel](https://vercel.com).
+2. Chọn `Add New -> Project`.
+3. Import repo GitHub này hoặc repo đã fork.
+4. Giữ cấu hình mặc định của Vercel cho Vite:
+   - Framework Preset: `Vite`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Install Command: `npm install`
+5. Trước khi bấm deploy, thêm Environment Variables:
+
+```env
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-public-anon-key
+VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
+```
+
+`VITE_FACEBOOK_MESSENGER_URL` có thể là link `m.me` hoặc link Facebook Page. Nếu chưa có Page, có thể tạm để trống; nút chat sẽ mở Facebook mặc định.
+
+### 3. Cấu hình Supabase Auth sau khi có domain Vercel
+
+Sau khi Vercel deploy xong, copy domain production, ví dụ:
+
+```text
+https://ten-project.vercel.app
+```
+
+Vào Supabase `Authentication -> URL Configuration` và cấu hình:
+
+```text
+Site URL:
+https://ten-project.vercel.app
+
+Redirect URLs:
+https://ten-project.vercel.app
+https://ten-project.vercel.app/?auth=reset-password
+http://localhost:5173
+http://localhost:5173/?auth=reset-password
+```
+
+Nếu đổi domain Vercel hoặc gắn custom domain, cần cập nhật lại các URL này.
+
+### 4. Redeploy sau khi sửa env
+
+Vite chỉ đọc các biến `VITE_*` tại thời điểm build. Vì vậy sau khi thêm hoặc sửa env trên Vercel, cần vào `Deployments -> Redeploy` để site nhận cấu hình mới.
+
+### 5. Kiểm tra sau deploy
+
+1. Mở trang chủ và trang sản phẩm.
+2. Đăng ký tài khoản bằng email thật.
+3. Kiểm tra email xác thực Supabase.
+4. Đăng nhập sau khi xác thực.
+5. Thêm sản phẩm vào giỏ và đặt hàng.
+6. Vào Supabase `Table Editor` kiểm tra bảng `orders` và `order_items`.
+7. Kiểm tra nút `Chat Facebook` có mở đúng Facebook Page/Messenger không.
+
+Tài khoản mới luôn mặc định là `customer`. Muốn tạo admin đầu tiên, đăng ký một tài khoản trước, sau đó nâng quyền trong Supabase bằng SQL theo hướng dẫn ở [docs/database-supabase-guide.md](./docs/database-supabase-guide.md).
+
 ## Cấu hình Messenger
 
 Website hiện dùng nút Messenger cố định ở góc màn hình. Khi bấm vào, người dùng được chuyển sang Facebook Page hoặc link `m.me` để chat trực tiếp.

@@ -13,7 +13,6 @@ src/
   features/
     admin/                 Admin dashboard: analytics, product CRUD, users.
     auth/                  Login and register pages.
-    chatbot/               @n8n/chat package wrapper and widget configuration.
     customer/              Customer profile and order history.
     staff/                 Staff product management screen.
   shared/
@@ -27,9 +26,8 @@ src/
 
 ```text
 docs/
-  chatbot-n8n-guide.md     n8n workflow setup notes.
   chatbot-test-cases.md    Chatbot demo and test prompts.
-  database-supabase-guide.md Supabase database, Vercel env, and n8n data access guide.
+  database-supabase-guide.md Supabase database, Vercel env, and workflow data access guide.
   prompt-library.md        Prompt examples for chatbot/product advice.
 ```
 

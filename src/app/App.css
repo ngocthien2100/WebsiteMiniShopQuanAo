@@ -814,6 +814,21 @@
   padding: 0 12px;
 }
 
+.price-filter-control span {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.price-number-input {
+  font-weight: 800;
+}
+
+.price-filter-control small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .checkout-form textarea {
   min-height: 96px;
   padding-top: 12px;
@@ -1005,35 +1020,32 @@
   color: var(--muted);
 }
 
-.n8n-chat-host {
-  --chat--color--primary: var(--brand-dark);
-  --chat--color--primary-shade-50: var(--brand);
-  --chat--color--primary--shade-100: #0d312a;
-  --chat--color--secondary: var(--brand);
-  --chat--color-secondary-shade-50: var(--brand-dark);
-  --chat--border-radius: 16px;
-  --chat--font-family: var(--font-body);
-  --chat--window--width: min(410px, calc(100vw - 32px));
-  --chat--window--height: min(560px, calc(100vh - 120px));
-  --chat--window--bottom: 22px;
-  --chat--window--right: 22px;
-  --chat--window--border-radius: 18px;
-  --chat--window--border: 1px solid var(--line);
-  --chat--header--background: var(--brand-dark);
-  --chat--header--color: white;
-  --chat--heading--font-size: 1.25rem;
-  --chat--subtitle--line-height: 1.5;
-  --chat--body--background: #f7f3ea;
-  --chat--message--bot--background: white;
-  --chat--message--bot--color: var(--ink);
-  --chat--message--user--background: var(--brand);
-  --chat--message--user--color: white;
-  --chat--toggle--size: 58px;
-  --chat--toggle--background: var(--brand-dark);
-  --chat--toggle--hover--background: var(--brand);
-  --chat--toggle--active--background: #0d312a;
-  --chat--input--send--button--color: var(--brand-dark);
-  --chat--input--send--button--color-hover: var(--brand);
+.facebook-chat-link {
+  align-items: center;
+  background: #0866ff;
+  border-radius: 999px;
+  bottom: 22px;
+  box-shadow: 0 18px 45px rgba(8, 102, 255, 0.25);
+  color: white;
+  display: inline-flex;
+  font-weight: 800;
+  gap: 10px;
+  padding: 14px 18px;
+  position: fixed;
+  right: 22px;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  z-index: 60;
+}
+
+.facebook-chat-link:hover {
+  background: #0758df;
+  box-shadow: 0 22px 55px rgba(8, 102, 255, 0.32);
+  transform: translateY(-2px);
+}
+
+.facebook-chat-link span {
+  white-space: nowrap;
 }
 
 @media (max-width: 960px) {
@@ -1071,6 +1083,16 @@
   .detail-info,
   .checkout-form {
     position: static;
+  }
+
+  .facebook-chat-link {
+    bottom: 16px;
+    padding: 14px;
+    right: 16px;
+  }
+
+  .facebook-chat-link span {
+    display: none;
   }
 
   .product-grid,

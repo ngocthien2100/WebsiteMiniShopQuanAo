@@ -1,11 +1,11 @@
 import { FormEvent, useMemo, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  Bot,
   Check,
   ChevronRight,
   Key,
   Minus,
+  MessageCircle,
   Plus,
   Search,
   ShoppingBag,
@@ -35,7 +35,6 @@ import ChangePasswordPage from "@/features/auth/ChangePasswordPage";
 import AdminPanel from "@/features/admin/AdminPanel";
 import StaffPanel from "@/features/staff/StaffPanel";
 import CustomerPanel from "@/features/customer/CustomerPanel";
-import N8nChatWidget from "@/features/chatbot/N8nChatWidget";
 
 import "./App.css";
 
@@ -75,6 +74,12 @@ const roleLabels: Record<User["role"], string> = {
   customer: "Khách hàng",
 };
 
+const DEFAULT_PRICE_LIMIT = 20_000_000;
+const PRICE_FILTER_STEP = 100_000;
+const facebookMessengerUrl =
+  (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_FACEBOOK_MESSENGER_URL?.trim() ||
+  "https://www.facebook.com/";
+
 const pageVariants = {
   initial: { opacity: 0, y: 18, filter: "blur(8px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
@@ -95,7 +100,7 @@ function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<"all" | ProductCategory>("all");
-  const [maxPrice, setMaxPrice] = useState(500000);
+  const [maxPrice, setMaxPrice] = useState(DEFAULT_PRICE_LIMIT);
   const [orderDone, setOrderDone] = useState(false);
   const [orderError, setOrderError] = useState("");
 
@@ -147,6 +152,16 @@ function App() {
       cancelled = true;
     };
   }, [page]);
+
+  const productPriceLimit = useMemo(() => {
+    const highestPrice = productsList.reduce((highest, product) => Math.max(highest, product.price), 0);
+    const roundedHighest = Math.ceil(highestPrice / 1_000_000) * 1_000_000;
+    return Math.max(DEFAULT_PRICE_LIMIT, roundedHighest);
+  }, [productsList]);
+
+  useEffect(() => {
+    setMaxPrice((current) => Math.max(current, productPriceLimit));
+  }, [productPriceLimit]);
 
   const filteredProducts = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -320,6 +335,7 @@ function App() {
                 setCategory={setCategory}
                 maxPrice={maxPrice}
                 setMaxPrice={setMaxPrice}
+                priceLimit={productPriceLimit}
                 openProduct={openProduct}
                 addToCart={addToCart}
               />
@@ -421,9 +437,24 @@ function App() {
         </AnimatePresence>
       </main>
 
-      {!isDashboardView && <N8nChatWidget />}
+      {!isDashboardView && <FacebookMessengerWidget />}
       {!isDashboardView && <Footer navigate={navigate} />}
     </div>
+  );
+}
+
+function FacebookMessengerWidget() {
+  return (
+    <a
+      aria-label="Chat với MiniStyle trên Facebook Messenger"
+      className="facebook-chat-link"
+      href={facebookMessengerUrl}
+      rel="noreferrer"
+      target="_blank"
+    >
+      <MessageCircle size={22} />
+      <span>Chat Facebook</span>
+    </a>
   );
 }
 
@@ -569,7 +600,7 @@ function HomePage({
           <h1>Thời trang hằng ngày, phối đồ có chủ đích.</h1>
           <p>
             Tuyển chọn các item dễ mặc cho sinh viên và người đi làm trẻ: rõ phom,
-            dễ phối, có dữ liệu sản phẩm thật và chatbot tư vấn theo ngữ cảnh mua sắm.
+            dễ phối, có dữ liệu sản phẩm thật và kênh tư vấn Messenger cho nhu cầu mua sắm.
           </p>
           <div className="hero-actions">
             <button className="primary-button" onClick={() => navigate("products")} type="button">
@@ -603,7 +634,7 @@ function HomePage({
             transition={{ delay: 0.55, duration: 0.4 }}
           >
             <Sparkles size={18} />
-            Auth, database & chatbot đã sẵn sàng
+            Auth, database & Messenger đã sẵn sàng
           </motion.div>
         </motion.div>
       </section>
@@ -694,6 +725,7 @@ function ProductsPage({
   setCategory,
   maxPrice,
   setMaxPrice,
+  priceLimit,
   openProduct,
   addToCart,
 }: {
@@ -704,9 +736,15 @@ function ProductsPage({
   setCategory: (value: "all" | ProductCategory) => void;
   maxPrice: number;
   setMaxPrice: (value: number) => void;
+  priceLimit: number;
   openProduct: (product: Product) => void;
   addToCart: (product: Product) => void;
 }) {
+  const updateMaxPrice = (value: number) => {
+    const safeValue = Number.isFinite(value) ? value : DEFAULT_PRICE_LIMIT;
+    setMaxPrice(Math.min(priceLimit, Math.max(0, safeValue)));
+  };
+
   return (
     <section className="page-section">
       <div className="page-title-row">
@@ -746,16 +784,27 @@ function ProductsPage({
             </select>
           </label>
 
-          <label>
-            Giá tối đa: {formatCurrency(maxPrice)}
+          <label className="price-filter-control">
+            <span>Giá tối đa: {formatCurrency(maxPrice)}</span>
             <input
-              max="1000000"
-              min="100000"
-              onChange={(event) => setMaxPrice(Number(event.target.value))}
-              step="50000"
+              max={priceLimit}
+              min="0"
+              onChange={(event) => updateMaxPrice(Number(event.target.value))}
+              step={PRICE_FILTER_STEP}
               type="range"
               value={maxPrice}
             />
+            <input
+              aria-label="Nhập giá tối đa"
+              className="price-number-input"
+              max={priceLimit}
+              min="0"
+              onChange={(event) => updateMaxPrice(Number(event.target.value))}
+              step={PRICE_FILTER_STEP}
+              type="number"
+              value={maxPrice}
+            />
+            <small>Có thể lọc đến {formatCurrency(priceLimit)}</small>
           </label>
 
           <div className="policy-box">
@@ -965,10 +1014,10 @@ function CartPage({
                   </div>
                 </article>
                 <article>
-                  <Bot size={18} />
+                  <MessageCircle size={18} />
                   <div>
-                    <strong>Chatbot hỗ trợ</strong>
-                    <p>Có thể hỏi chatbot về size, ngân sách, cách đặt hàng và chính sách đổi trả.</p>
+                    <strong>Messenger hỗ trợ</strong>
+                    <p>Có thể nhắn tin hỏi về size, ngân sách, cách đặt hàng và chính sách đổi trả.</p>
                   </div>
                 </article>
               </div>
@@ -1101,7 +1150,7 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
     <footer className="site-footer">
       <div>
         <h2>MiniStyle</h2>
-        <p>Website bán hàng mini theo hướng thương mại thời trang, có xác thực Supabase, cơ sở dữ liệu và chatbot tư vấn qua n8n.</p>
+        <p>Website bán hàng mini theo hướng thương mại thời trang, có xác thực Supabase, cơ sở dữ liệu và kênh tư vấn qua Messenger.</p>
       </div>
       <div>
         <strong>Liên kết</strong>

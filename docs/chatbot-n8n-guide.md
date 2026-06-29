@@ -1,22 +1,29 @@
-# Huong dan tich hop Chatbot n8n cho MiniStyle
+# Ghi chu chatbot n8n cho MiniStyle
 
-Tai lieu nay dung de trinh bay minh chung cho do an cuoi ky: website ban hang mini tich hop chatbot tu van san pham bang package `@n8n/chat`.
+Tai lieu nay giu lai phan thiet ke chatbot n8n neu sau nay can mo rong. Phien ban frontend hien tai khong con nhung widget chat truc tiep vao website; website dang dung nut Messenger de chuyen nguoi dung sang Facebook Page chat truc tiep.
 
-## 1. Luong xu ly
+## 1. Luong dang dung hien tai
 
 ```text
 Nguoi dung tren website
--> @n8n/chat widget
--> n8n Chat Trigger URL
--> AI Agent / Chain trong n8n
--> Tra loi ve widget chat
+-> Bam nut Chat Facebook
+-> Mo link Facebook Page hoac m.me
+-> Chat truc tiep tren Messenger
 ```
 
-Frontend chi hien thi widget va truyen cau hoi sang n8n. API key cua AI phai de trong n8n, khong dua vao code React.
+Frontend chi can bien moi truong:
 
-## 2. Yeu cau workflow n8n
+```env
+VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
+```
 
-Workflow nen co cau truc toi thieu:
+Neu chua cau hinh bien nay, nut chat van hien thi nhung chi mo trang Facebook mac dinh.
+
+## 2. Neu muon dung lai n8n sau nay
+
+n8n van co the dung lam he thong xu ly hoi dap rieng, nhung nen de no o tang workflow/backend thay vi nhung widget truc tiep vao website. API key cua AI phai de trong n8n hoac server rieng, khong dua vao code React.
+
+Workflow n8n co the co cau truc toi thieu:
 
 ```text
 Chat Trigger
@@ -31,35 +38,19 @@ Trong Chat Trigger:
 - Dung Production Chat URL, khong dung test URL.
 - Workflow phai Active.
 
-## 3. Bien moi truong frontend
+## 3. Du lieu nen cho chatbot truy van
 
-Tao file `.env.local` o thu muc goc project:
+n8n khong nen phu thuoc vao du lieu gui tu frontend. Neu dung chatbot AI, workflow nen tu query Supabase de lay du lieu moi nhat:
 
-```env
-VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
-```
+- `products`: san pham, danh muc, gia, tags, ton kho.
+- `shop_policies`: giao hang, doi tra, cach dat hang.
+- `orders`: tra cuu don hang khi co ma don hoac so dien thoai, neu policy bao mat cho phep.
 
-Neu chua cau hinh bien nay, widget chat se khong hien thi.
-
-## 4. Du lieu gui kem sang n8n
-
-Component `N8nChatWidget` truyen du lieu san pham va chinh sach qua `metadata` cua package `@n8n/chat`:
-
-```json
-{
-  "source": "ministyle-website",
-  "products": [],
-  "policy": {}
-}
-```
-
-Trong workflow n8n, hay dung metadata nay lam context cho AI Agent de chatbot chi tu van dua tren san pham va chinh sach cua shop.
-
-## 5. System prompt goi y cho AI Agent
+## 4. System prompt goi y cho AI Agent
 
 ```text
 Ban la chatbot tu van san pham cua shop quan ao MiniStyle.
-Chi duoc tu van dua tren metadata.products va metadata.policy ma Chat Trigger nhan duoc.
+Chi duoc tu van dua tren du lieu products va shop_policies lay tu Supabase.
 Khong bia gia, khong bia chinh sach, khong tu van ngoai danh sach san pham.
 Neu nguoi dung thieu ngan sach, phong cach, gioi tinh, size hoac muc dich su dung, hay hoi lai toi da 1 cau ngan gon.
 Neu co du lieu phu hop, tra loi bang tieng Viet tu nhien, ngan gon, gom:
@@ -70,7 +61,7 @@ Neu co du lieu phu hop, tra loi bang tieng Viet tu nhien, ngan gon, gom:
 Neu khong co san pham phu hop, noi ro chua co san pham trong du lieu hien tai.
 ```
 
-## 6. Bao mat va dao duc AI
+## 5. Bao mat va dao duc AI
 
 - Khong dua API key len GitHub.
 - Khong xu ly thanh toan that trong demo.

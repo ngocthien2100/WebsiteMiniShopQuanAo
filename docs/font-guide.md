@@ -14,7 +14,7 @@ Hai font này là system font phổ biến, vì vậy dự án không cần Goog
 --font-display: Georgia, "Times New Roman", serif;
 ```
 
-`Georgia` được dùng cho hero, tiêu đề trang, tiêu đề section và các điểm nhấn editorial. `Verdana` được dùng cho nội dung dài, menu, nút, bảng, form và chatbot để chữ đều, rõ và ổn định trên nhiều thiết bị.
+`Georgia` được dùng cho hero, tiêu đề trang, tiêu đề section và các điểm nhấn editorial. `Verdana` được dùng cho nội dung dài, menu, nút, bảng, form và các nút liên hệ để chữ đều, rõ và ổn định trên nhiều thiết bị.
 
 ## Lý do chọn
 

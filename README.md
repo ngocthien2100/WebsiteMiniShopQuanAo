@@ -1,6 +1,6 @@
 # MiniStyle - Website bán quần áo
 
-MiniStyle là website bán hàng mini xây bằng Vite + React. Dự án có giao diện cửa hàng, giỏ hàng, đặt hàng mẫu, đăng nhập/đăng ký, phân quyền quản trị viên/nhân viên/khách hàng và chatbot tư vấn sản phẩm bằng package `@n8n/chat`.
+MiniStyle là website bán hàng mini xây bằng Vite + React. Dự án có giao diện cửa hàng, giỏ hàng, đặt hàng mẫu, đăng nhập/đăng ký, phân quyền quản trị viên/nhân viên/khách hàng và nút liên hệ Messenger dẫn tới Facebook Page của shop.
 
 ## Chạy dự án
 
@@ -17,17 +17,17 @@ Build production:
 npm run build
 ```
 
-## Cấu hình chatbot n8n
+## Cấu hình Messenger
 
-Chatbot hiện dùng package chính thức `@n8n/chat`, vì vậy workflow n8n nên dùng **Chat Trigger** node và bật public/embedded chat.
+Website hiện dùng nút Messenger cố định ở góc màn hình. Khi bấm vào, người dùng được chuyển sang Facebook Page hoặc link `m.me` để chat trực tiếp.
 
 Tạo file `.env.local` ở thư mục gốc:
 
 ```env
-VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
+VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
 ```
 
-Nếu không có biến môi trường này, widget chat sẽ không hiển thị.
+Nếu chưa có biến môi trường này, nút chat vẫn hiển thị nhưng chỉ mở trang Facebook mặc định.
 
 ## Cấu hình database Supabase
 
@@ -38,7 +38,7 @@ Tạo `.env.local` theo mẫu:
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-public-anon-key
-VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
+VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
 ```
 
 SQL tạo bảng nằm ở [supabase/schema.sql](./supabase/schema.sql). Hướng dẫn chi tiết: [docs/database-supabase-guide.md](./docs/database-supabase-guide.md).
@@ -56,7 +56,7 @@ Font chữ được cấu hình theo hướng dễ đọc và phù hợp website
 ```text
 src/
   app/            App shell, routing state, cart, main CSS.
-  features/       Các màn hình nghiệp vụ theo vai trò và chatbot package wrapper.
+  features/       Các màn hình nghiệp vụ theo vai trò.
   shared/services/ Lớp repository đọc/ghi Supabase, có fallback localStorage.
   shared/supabase/ Cấu hình Supabase client phía frontend.
   shared/data/    Dữ liệu sản phẩm, mock users, mock orders, localStorage helpers.
@@ -69,7 +69,6 @@ Chi tiết hơn: xem [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 
 ## Tài liệu liên quan
 
-- [docs/chatbot-n8n-guide.md](./docs/chatbot-n8n-guide.md)
 - [docs/database-supabase-guide.md](./docs/database-supabase-guide.md)
 - [docs/email-template-guide.md](./docs/email-template-guide.md)
 - [docs/font-guide.md](./docs/font-guide.md)

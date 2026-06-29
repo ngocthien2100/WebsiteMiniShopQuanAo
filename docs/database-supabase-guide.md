@@ -7,7 +7,7 @@ Dự án đang có hai chế độ dữ liệu:
 - `Local demo`: không cấu hình Supabase, app dùng `localStorage` để vẫn demo được trên máy cá nhân.
 - `Supabase cloud`: có biến môi trường Supabase, app đọc sản phẩm và ghi đơn hàng lên Postgres để deploy thật hơn.
 
-Supabase được chọn vì một project có sẵn Postgres database, Auth, Storage, REST API và Row Level Security. Frontend chỉ được dùng `anon key`; `service_role key` chỉ dùng trong n8n hoặc server riêng.
+Supabase được chọn vì một project có sẵn Postgres database, Auth, Storage, REST API và Row Level Security. Frontend chỉ được dùng `anon key`; `service_role key` chỉ dùng trong server riêng hoặc workflow backend bảo mật.
 
 ## File đã thêm
 
@@ -99,7 +99,7 @@ Tạo file `.env.local` ở thư mục gốc:
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-public-anon-key
-VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
+VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
 ```
 
 Sau đó chạy lại dev server:
@@ -114,11 +114,11 @@ Vào project Vercel -> `Settings` -> `Environment Variables` và thêm:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
-- `VITE_N8N_CHATBOT_WEBHOOK`
+- `VITE_FACEBOOK_MESSENGER_URL`
 
 Sau khi thêm hoặc sửa biến môi trường, cần redeploy site. Dự án có [vercel.json](../vercel.json) để rewrite mọi route client-side về `index.html`, giúp các luồng như quên mật khẩu hoặc mở trực tiếp URL không bị 404.
 
-## Kết nối n8n với database
+## Kết nối chatbot hoặc workflow với database
 
 Chatbot không nên phụ thuộc vào dữ liệu gửi từ frontend. Workflow n8n nên tự query Supabase:
 

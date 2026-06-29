@@ -29,7 +29,7 @@ src/
 docs/
   chatbot-n8n-guide.md     n8n workflow setup notes.
   chatbot-test-cases.md    Chatbot demo and test prompts.
-  database-supabase-guide.md Supabase database, Netlify env, and n8n data access guide.
+  database-supabase-guide.md Supabase database, Vercel env, and n8n data access guide.
   prompt-library.md        Prompt examples for chatbot/product advice.
 ```
 
@@ -58,6 +58,6 @@ Files in `archive/generated` are not imported by the running application. They a
 ```text
 index.html                 Vite HTML shell.
 vite.config.ts             Vite, React, Tailwind, and path alias config.
+vercel.json                Vercel SPA rewrite config.
 package.json               Scripts and dependencies.
-netlify.toml               Deployment config.
 ```

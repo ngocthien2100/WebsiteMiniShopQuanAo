@@ -14,7 +14,7 @@ Supabase được chọn vì một project có sẵn Postgres database, Auth, St
 - `supabase/schema.sql`: tạo bảng, policy RLS và seed sản phẩm/chính sách mẫu.
 - `src/shared/supabase/client.ts`: tạo Supabase client từ biến môi trường.
 - `src/shared/services/shopRepository.ts`: lớp đọc/ghi dữ liệu, có fallback localStorage.
-- `.env.example`: mẫu biến môi trường cho local và Netlify.
+- `.env.example`: mẫu biến môi trường cho local và Vercel.
 
 ## Cách tạo database
 
@@ -69,14 +69,14 @@ Trong Supabase Dashboard, vào `Authentication` -> `URL Configuration`.
 Thiết lập:
 
 ```text
-Site URL: https://websiteminishopquanao.netlify.app
+Site URL: https://websiteminishopquanao.vercel.app
 ```
 
 Thêm `Redirect URLs`:
 
 ```text
-https://websiteminishopquanao.netlify.app
-https://websiteminishopquanao.netlify.app/?auth=reset-password
+https://websiteminishopquanao.vercel.app
+https://websiteminishopquanao.vercel.app/?auth=reset-password
 http://localhost:5173
 http://localhost:5173/?auth=reset-password
 ```
@@ -106,15 +106,15 @@ Sau đó chạy lại dev server:
 npm run dev
 ```
 
-## Cấu hình Netlify
+## Cấu hình Vercel
 
-Vào `Site configuration` -> `Environment variables` và thêm:
+Vào project Vercel -> `Settings` -> `Environment Variables` và thêm:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 - `VITE_N8N_CHATBOT_WEBHOOK`
 
-Sau khi thêm biến môi trường, cần redeploy site.
+Sau khi thêm hoặc sửa biến môi trường, cần redeploy site. Dự án có [vercel.json](../vercel.json) để rewrite mọi route client-side về `index.html`, giúp các luồng như quên mật khẩu hoặc mở trực tiếp URL không bị 404.
 
 ## Kết nối n8n với database
 

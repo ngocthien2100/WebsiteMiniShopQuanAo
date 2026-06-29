@@ -45,7 +45,7 @@ SQL tạo bảng nằm ở [supabase/schema.sql](./supabase/schema.sql). Hướn
 
 Đăng ký/đăng nhập hiện dùng Supabase Auth khi có env Supabase. Tài khoản mới mặc định là `customer`; tài khoản admin đầu tiên cần được nâng quyền trong Supabase bằng SQL theo hướng dẫn database.
 
-Supabase Auth cũng xử lý xác thực email, đổi mật khẩu và quên mật khẩu. Cần cấu hình `Authentication -> URL Configuration` trong Supabase để redirect về domain Netlify và `/?auth=reset-password`.
+Supabase Auth cũng xử lý xác thực email, đổi mật khẩu và quên mật khẩu. Cần cấu hình `Authentication -> URL Configuration` trong Supabase để redirect về domain Vercel và `/?auth=reset-password`.
 
 Các mẫu email HTML theo phong cách MiniStyle nằm trong [email-templates](./email-templates) và hướng dẫn sử dụng ở [docs/email-template-guide.md](./docs/email-template-guide.md).
 
@@ -62,6 +62,8 @@ src/
   shared/data/    Dữ liệu sản phẩm, mock users, mock orders, localStorage helpers.
   styles/         Global CSS, Tailwind entry, theme và fonts.
 ```
+
+Deploy hiện tại dùng Vercel. File [vercel.json](./vercel.json) cấu hình rewrite để các route client-side của React/Vite không bị 404 khi refresh hoặc mở trực tiếp.
 
 Chi tiết hơn: xem [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 

@@ -20,7 +20,7 @@ src/
     data/                  Product catalog, mock users, mock orders, localStorage DB helpers.
     services/              Data repositories for Supabase with localStorage fallback.
     supabase/              Frontend Supabase client configuration.
-  styles/                  Global CSS, Tailwind entry, theme and font imports.
+  styles/                  Global CSS, Tailwind entry, theme and Georgia/Verdana font config.
 ```
 
 ## Documentation

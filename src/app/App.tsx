@@ -71,6 +71,12 @@ const categoryStories: Record<ProductCategory, string> = {
   "phu-kien": "Điểm nhấn nhỏ giúp outfit có cá tính hơn.",
 };
 
+const roleLabels: Record<User["role"], string> = {
+  admin: "Quản trị viên",
+  staff: "Nhân viên",
+  customer: "Khách hàng",
+};
+
 const pageVariants = {
   initial: { opacity: 0, y: 18, filter: "blur(8px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
@@ -456,7 +462,7 @@ function Header({
     <>
       <div className="atelier-bar">
         <span>MiniStyle Studio</span>
-        <span>Freeship đơn từ 500.000đ</span>
+        <span>Miễn phí vận chuyển từ 500.000đ</span>
         <span>Đổi size trong 7 ngày</span>
       </div>
       <header className="site-header">
@@ -464,7 +470,7 @@ function Header({
           <span className="brand-mark">MS</span>
           <span>
             <strong>MiniStyle</strong>
-            <small>Curated daily wear</small>
+            <small>Thời trang ứng dụng mỗi ngày</small>
           </span>
         </button>
 
@@ -508,17 +514,17 @@ function Header({
               <div className="profile-dropdown-menu">
                 <div className="dropdown-user-info">
                   <strong>{currentUser.name}</strong>
-                  <span className="role-tag">{currentUser.role}</span>
+                  <span className="role-tag">{roleLabels[currentUser.role]}</span>
                 </div>
                 <hr />
                 {currentUser.role === "admin" && (
                   <button onClick={() => { navigate("admin"); setDropdownOpen(false); }}>
-                    <Shield size={16} /> Admin Portal
+                    <Shield size={16} /> Trang quản trị
                   </button>
                 )}
                 {currentUser.role === "staff" && (
                   <button onClick={() => { navigate("staff"); setDropdownOpen(false); }}>
-                    <UserCheck size={16} /> Staff Portal
+                    <UserCheck size={16} /> Trang nhân viên
                   </button>
                 )}
                 {currentUser.role === "customer" && (
@@ -573,8 +579,8 @@ function HomePage({
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           variants={revealVariants}
         >
-          <p className="eyebrow">MiniStyle Spring Edit</p>
-          <h1>Daily wear, styled with intention.</h1>
+          <p className="eyebrow">Bộ sưu tập xuân MiniStyle</p>
+          <h1>Thời trang hằng ngày, phối đồ có chủ đích.</h1>
           <p>
             Tuyển chọn các item dễ mặc cho sinh viên và người đi làm trẻ: rõ phom,
             dễ phối, có dữ liệu sản phẩm thật và chatbot tư vấn theo ngữ cảnh mua sắm.
@@ -617,15 +623,15 @@ function HomePage({
       </section>
 
       <section className="editorial-strip" aria-label="Điểm nhấn trải nghiệm">
-        <span>New arrivals</span>
-        <span>Campus essentials</span>
-        <span>Smart casual</span>
-        <span>Accessories edit</span>
+        <span>Sản phẩm mới</span>
+        <span>Đồ đi học</span>
+        <span>Đi làm gọn gàng</span>
+        <span>Phụ kiện nổi bật</span>
       </section>
 
       <section className="section">
         <SectionHeading
-          title="Shop by edit"
+          title="Chọn theo phong cách"
           description="Danh mục được viết theo nhu cầu phối đồ để người dùng chọn nhanh hơn."
         />
         <div className="category-grid">
@@ -655,8 +661,8 @@ function HomePage({
 
       <section className="section">
         <SectionHeading
-          title="Curated pieces"
-          description="Product card được tối giản để ảnh, tên, giá và lựa chọn mua nổi bật hơn."
+          title="Sản phẩm được chọn lọc"
+          description="Thẻ sản phẩm được tối giản để ảnh, tên, giá và lựa chọn mua nổi bật hơn."
         />
         <div className="product-grid">
           {featured.map((product) => (
@@ -720,7 +726,7 @@ function ProductsPage({
       <div className="page-title-row">
         <div>
           <p className="eyebrow">Danh sách sản phẩm</p>
-          <h1>Collection</h1>
+          <h1>Bộ sưu tập</h1>
           <p>{products.length} sản phẩm đang hiển thị, đồng bộ từ hệ thống dữ liệu của shop.</p>
         </div>
         <div className="search-box">
@@ -737,7 +743,7 @@ function ProductsPage({
         <aside className="filters-panel">
           <div className="filter-title">
             <SlidersHorizontal size={18} />
-            Refine
+            Bộ lọc
           </div>
 
           <label>
@@ -767,15 +773,15 @@ function ProductsPage({
           </label>
 
           <div className="policy-box">
-            <strong>Live catalog</strong>
-            <p>Admin và Staff chỉnh sửa sản phẩm, catalog cập nhật lại trên storefront sau khi reload dữ liệu.</p>
+            <strong>Danh mục đang đồng bộ</strong>
+            <p>Quản trị viên và nhân viên chỉnh sửa sản phẩm, danh mục sẽ cập nhật lại trên trang bán hàng sau khi tải lại dữ liệu.</p>
           </div>
         </aside>
 
         <div className="catalog-results">
           <div className="catalog-toolbar">
-            <span>{products.length} items</span>
-            <span>Sort by editorial relevance</span>
+            <span>{products.length} sản phẩm</span>
+            <span>Sắp xếp theo mức độ phù hợp</span>
           </div>
           <div className="product-grid catalog-grid">
             {products.length > 0 ? (
@@ -1101,7 +1107,7 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
     <footer className="site-footer">
       <div>
         <h2>MiniStyle</h2>
-        <p>Website bán hàng mini theo hướng fashion commerce, có Supabase Auth, database và chatbot tư vấn qua n8n.</p>
+        <p>Website bán hàng mini theo hướng thương mại thời trang, có xác thực Supabase, cơ sở dữ liệu và chatbot tư vấn qua n8n.</p>
       </div>
       <div>
         <strong>Liên kết</strong>
@@ -1112,8 +1118,6 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
       <div>
         <strong>Mạng xã hội</strong>
         <span>Facebook</span>
-        <span>Instagram</span>
-        <span>TikTok</span>
       </div>
     </footer>
   );
@@ -1144,35 +1148,35 @@ function QuickRoleSwitcher({
   return (
     <div className="quick-role-switcher-widget">
       <div className="widget-header">
-        <strong>Demo Switcher (Chuyển vai trò)</strong>
+        <strong>Bảng chuyển vai trò demo</strong>
         <button onClick={() => setCollapsed(true)}>×</button>
       </div>
       <div className="widget-body">
-        <p>Hiện tại: <strong>{currentUser ? `${currentUser.name} (${currentUser.role})` : "Khách vãng lai"}</strong></p>
+        <p>Hiện tại: <strong>{currentUser ? `${currentUser.name} (${roleLabels[currentUser.role]})` : "Khách vãng lai"}</strong></p>
         <div className="switcher-btn-grid">
           <button 
             className={`btn-sw admin-sw ${currentUser?.role === "admin" ? "active" : ""}`}
             onClick={() => onSwitchRole("admin")}
           >
-            Admin
+            Quản trị
           </button>
           <button 
             className={`btn-sw staff-sw ${currentUser?.role === "staff" ? "active" : ""}`}
             onClick={() => onSwitchRole("staff")}
           >
-            Staff
+            Nhân viên
           </button>
           <button 
             className={`btn-sw customer-sw ${currentUser?.role === "customer" ? "active" : ""}`}
             onClick={() => onSwitchRole("customer")}
           >
-            Customer
+            Khách hàng
           </button>
           <button 
             className="btn-sw logout-sw"
             onClick={() => onSwitchRole(null)}
           >
-            Log Out
+            Đăng xuất
           </button>
         </div>
       </div>

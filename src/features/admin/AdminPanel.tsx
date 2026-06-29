@@ -303,7 +303,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
           <span className="logo-box">MS</span>
           <div>
             <strong>MiniStyle</strong>
-            <small>Admin Portal</small>
+            <small>Trang quản trị</small>
           </div>
         </div>
 
@@ -312,7 +312,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
             className={`nav-item ${activeTab === "dashboard" ? "active" : ""}`}
             onClick={() => setActiveTab("dashboard")}
           >
-            <LayoutDashboard size={18} /> Dashboard
+            <LayoutDashboard size={18} /> Tổng quan
           </button>
           <button
             className={`nav-item ${activeTab === "products" ? "active" : ""}`}
@@ -348,7 +348,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
               {activeTab === "products" && "Danh sách sản phẩm"}
               {activeTab === "users" && "Quản lý tài khoản phân quyền"}
             </h1>
-            <p>Trang quản trị hệ thống bán hàng MiniStyle · Database: {getDatabaseModeLabel()}</p>
+            <p>Trang quản trị hệ thống bán hàng MiniStyle · Cơ sở dữ liệu: {getDatabaseModeLabel()}</p>
           </div>
           <button className="secondary-button" onClick={onNavigateHome}>
             Xem trang bán hàng
@@ -365,7 +365,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                   <TrendingUp size={24} />
                 </div>
                 <div className="stat-info">
-                  <span>Tổng Doanh Thu</span>
+                  <span>Tổng doanh thu</span>
                   <h3>{formatCurrency(stats.totalSales)}</h3>
                 </div>
               </div>
@@ -374,7 +374,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                   <ShoppingBag size={24} />
                 </div>
                 <div className="stat-info">
-                  <span>Tổng Đơn Hàng</span>
+                  <span>Tổng đơn hàng</span>
                   <h3>{stats.totalOrdersCount}</h3>
                 </div>
               </div>
@@ -383,7 +383,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                   <Package size={24} />
                 </div>
                 <div className="stat-info">
-                  <span>Số Lượng Sản Phẩm</span>
+                  <span>Số lượng sản phẩm</span>
                   <h3>{stats.totalProductsCount}</h3>
                 </div>
               </div>
@@ -392,7 +392,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                   <Users size={24} />
                 </div>
                 <div className="stat-info">
-                  <span>Khách Hàng & Staff</span>
+                  <span>Khách hàng & nhân viên</span>
                   <h3>{stats.totalUsersCount}</h3>
                 </div>
               </div>
@@ -509,7 +509,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                     <th>Tên sản phẩm</th>
                     <th>Danh mục</th>
                     <th>Giá</th>
-                    <th>Nhãn (Badge)</th>
+                    <th>Nhãn nổi bật</th>
                     <th>Size có sẵn</th>
                     <th>Màu sắc</th>
                     <th>Hành động</th>
@@ -579,9 +579,9 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                           onChange={(e) => handleChangeUserRole(user.id, e.target.value as any)}
                           disabled={user.id === currentUser.id}
                         >
-                          <option value="customer">Customer (Khách hàng)</option>
-                          <option value="staff">Staff (Nhân viên)</option>
-                          <option value="admin">Admin (Quản trị viên)</option>
+                          <option value="customer">Khách hàng</option>
+                          <option value="staff">Nhân viên</option>
+                          <option value="admin">Quản trị viên</option>
                         </select>
                       </td>
                       <td>
@@ -661,7 +661,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                   </select>
                 </label>
                 <label>
-                  Nhãn (Badge - ví dụ: Best seller, New, Sale)
+                  Nhãn nổi bật (ví dụ: Bán chạy, Mới, Giảm giá)
                   <input
                     type="text"
                     placeholder="Không có"

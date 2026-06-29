@@ -1548,7 +1548,7 @@ function Link7() {
   return (
     <div className="h-[16.8px] relative shrink-0 w-[82.5px]" data-name="Link">
       <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Regular',sans-serif] font-medium justify-center leading-[0] left-0 not-italic text-[#45474d] text-[14px] top-[7.5px] tracking-[0.7px] whitespace-nowrap">
-        <p className="leading-[16.8px]">Collections</p>
+        <p className="leading-[16.8px]">Bộ sưu tập</p>
       </div>
     </div>
   );

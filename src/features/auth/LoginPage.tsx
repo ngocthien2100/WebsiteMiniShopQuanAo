@@ -139,7 +139,7 @@ export default function LoginPage({
         {/* Khu vực Demo Đăng nhập nhanh - Cực kỳ hữu ích khi chấm điểm đồ án */}
         <div className="quick-login-section">
           <div className="quick-login-divider">
-            <span>Dành cho Giảng viên (Demo Quick Login)</span>
+            <span>Dành cho giảng viên: đăng nhập nhanh demo</span>
           </div>
           <div className="quick-login-buttons">
             <button 
@@ -148,7 +148,7 @@ export default function LoginPage({
               onClick={() => handleQuickLogin("admin")}
               title="Tài khoản: admin@ministyle.com | MK: admin123"
             >
-              <Shield size={16} /> Admin Panel
+              <Shield size={16} /> Quản trị viên
             </button>
             <button 
               type="button" 
@@ -156,7 +156,7 @@ export default function LoginPage({
               onClick={() => handleQuickLogin("staff")}
               title="Tài khoản: staff@ministyle.com | MK: staff123"
             >
-              <UserCheck size={16} /> Staff (Nhân viên)
+              <UserCheck size={16} /> Nhân viên
             </button>
             <button 
               type="button" 
@@ -164,7 +164,7 @@ export default function LoginPage({
               onClick={() => handleQuickLogin("customer")}
               title="Tài khoản: customer@ministyle.com | MK: customer123"
             >
-              <UserCheck size={16} /> Customer (Khách)
+              <UserCheck size={16} /> Khách hàng
             </button>
           </div>
         </div>

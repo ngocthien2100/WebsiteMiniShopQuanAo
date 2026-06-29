@@ -65,7 +65,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
     description: "",
   });
 
-  // PRODUCT CRUD LOGIC
+  // Logic thêm và chỉnh sửa sản phẩm
   const handleOpenAddProduct = () => {
     setEditingProduct(null);
     setProductForm({
@@ -173,7 +173,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
           <span className="logo-box staff-logo">NV</span>
           <div>
             <strong>MiniStyle</strong>
-            <small>Staff Portal</small>
+            <small>Trang nhân viên</small>
           </div>
         </div>
 
@@ -194,12 +194,12 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Khu vực nội dung chính */}
       <main className="admin-content">
         <header className="content-header">
           <div>
             <h1>Quản lý sản phẩm (Quyền Nhân viên)</h1>
-            <p>Cho phép thêm, sửa thông tin sản phẩm. Database: {getDatabaseModeLabel()}.</p>
+            <p>Cho phép thêm, sửa thông tin sản phẩm. Cơ sở dữ liệu: {getDatabaseModeLabel()}.</p>
           </div>
           <button className="secondary-button" onClick={onNavigateHome}>
             Xem trang bán hàng
@@ -222,7 +222,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
                   <th>Tên sản phẩm</th>
                   <th>Danh mục</th>
                   <th>Giá</th>
-                  <th>Nhãn (Badge)</th>
+                  <th>Nhãn nổi bật</th>
                   <th>Size</th>
                   <th>Màu sắc</th>
                   <th>Hành động</th>
@@ -252,7 +252,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
                         <button 
                           className="delete-btn disabled-btn" 
                           disabled 
-                          title="Staff không có quyền xóa sản phẩm. Chỉ Admin mới có quyền này."
+                          title="Nhân viên không có quyền xóa sản phẩm. Chỉ quản trị viên mới có quyền này."
                         >
                           <Lock size={14} /> <Trash2 size={14} />
                         </button>
@@ -312,7 +312,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
                   </select>
                 </label>
                 <label>
-                  Nhãn (Badge - ví dụ: Best seller, New, Sale)
+                  Nhãn nổi bật (ví dụ: Bán chạy, Mới, Giảm giá)
                   <input
                     type="text"
                     placeholder="Không có"

@@ -58,7 +58,7 @@ set role = 'admin'
 where email = 'email-cua-ban@example.com';
 ```
 
-Sau đó đăng xuất và đăng nhập lại trên website. Tài khoản đó sẽ vào được Admin Portal. Các tài khoản đăng ký mới vẫn mặc định là `customer`; admin có thể đổi role sang `staff` hoặc khóa tài khoản trong màn quản trị.
+Sau đó đăng xuất và đăng nhập lại trên website. Tài khoản đó sẽ vào được trang quản trị. Các tài khoản đăng ký mới vẫn mặc định là `customer`; quản trị viên có thể đổi role sang `staff` hoặc khóa tài khoản trong màn quản trị.
 
 Nếu Supabase đang bật xác thực email, người dùng phải bấm link xác thực trong email trước khi đăng nhập. Nếu muốn demo nhanh trên lớp, có thể vào `Authentication` -> `Providers` -> `Email` và tắt yêu cầu confirm email.
 

@@ -1465,7 +1465,7 @@ function LinkMargin3() {
   return (
     <div className="content-stretch flex flex-col items-start pl-[32px] relative shrink-0" data-name="Link:margin">
       <div className="[word-break:break-word] flex flex-col font-['Inter:Regular',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[#45474d] text-[14px] tracking-[0.7px] whitespace-nowrap">
-        <p className="leading-[16.8px]">Collections</p>
+        <p className="leading-[16.8px]">Bộ sưu tập</p>
       </div>
     </div>
   );

@@ -1,29 +1,21 @@
 # MiniStyle font guide
 
-MiniStyle uses a fashion editorial typography direction:
+MiniStyle dùng hướng chữ thời trang nhưng vẫn ưu tiên dễ đọc tiếng Việt:
 
-- Display headings: `Editorial New`
-- Body and interface: `General Sans`
+- Heading/editorial: `Georgia`
+- Body/UI/form/button: `Verdana`
 
-The project no longer imports Google Fonts. Fonts are configured in `src/styles/fonts.css` and expected as self-hosted `.woff2` files in `public/fonts/`.
+Hai font này là system font phổ biến, vì vậy dự án không cần Google Fonts và cũng không cần commit file font thương mại vào repository.
 
-## Required files
+## Cấu hình trong code
 
-```text
-public/fonts/GeneralSans-Regular.woff2
-public/fonts/GeneralSans-Medium.woff2
-public/fonts/GeneralSans-Semibold.woff2
-public/fonts/EditorialNew-Regular.woff2
-public/fonts/EditorialNew-Ultralight.woff2
+```css
+--font-body: Verdana, Geneva, Tahoma, sans-serif;
+--font-display: Georgia, "Times New Roman", serif;
 ```
 
-Until these files are added, the site falls back to system fonts with a similar feel:
+`Georgia` được dùng cho hero, tiêu đề trang, tiêu đề section và các điểm nhấn editorial. `Verdana` được dùng cho nội dung dài, menu, nút, bảng, form và chatbot để chữ đều, rõ và ổn định trên nhiều thiết bị.
 
-- Body/UI: `Satoshi`, `Avenir Next`, `Segoe UI`, Arial
-- Display: `Didot`, `Bodoni 72`, Georgia
+## Lý do chọn
 
-After adding the `.woff2` files, uncomment the `@font-face` blocks in `src/styles/fonts.css`.
-
-## License note
-
-Only add commercial font files to the repository if the font license allows repository storage and web embedding. If the license does not allow committing the files, keep them out of Git and add them during deployment.
+`Georgia` có cảm giác editorial/fashion hơn so với sans-serif thuần, còn `Verdana` có chiều rộng chữ thoáng, phù hợp tiếng Việt và dễ đọc ở kích thước nhỏ trong form, bảng dữ liệu, dashboard.

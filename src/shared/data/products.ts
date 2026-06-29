@@ -25,7 +25,7 @@ export const products: Product[] = [
     price: 189000,
     image:
       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80",
-    badge: "Best seller",
+    badge: "Bán chạy",
     colors: ["Trắng", "Đen", "Be"],
     sizes: ["S", "M", "L", "XL"],
     shortDescription: "Áo thun cotton mềm, dễ phối đồ, phù hợp đi học và đi chơi.",
@@ -42,7 +42,7 @@ export const products: Product[] = [
     price: 329000,
     image:
       "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=900&q=80",
-    badge: "New",
+    badge: "Mới",
     colors: ["Trắng", "Xanh nhạt"],
     sizes: ["S", "M", "L"],
     shortDescription: "Áo sơ mi lịch sự, chất đứng form, hợp đi học, đi làm và hẹn gặp.",
@@ -75,7 +75,7 @@ export const products: Product[] = [
     price: 399000,
     image:
       "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=900&q=80",
-    badge: "Sale",
+    badge: "Giảm giá",
     colors: ["Kem", "Nâu sữa"],
     sizes: ["S", "M", "L"],
     shortDescription: "Váy midi nhẹ, thanh lịch, hợp cafe, đi học và đi làm.",
@@ -108,7 +108,7 @@ export const products: Product[] = [
     price: 349000,
     image:
       "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80",
-    badge: "New",
+    badge: "Mới",
     colors: ["Nâu", "Kem", "Xanh rêu"],
     sizes: ["S", "M", "L"],
     shortDescription: "Cardigan mỏng, dễ khoác ngoài khi đi học hoặc đi làm.",

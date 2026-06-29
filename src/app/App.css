@@ -8,8 +8,8 @@
   --brand-dark: #123f36;
   --accent: #b36b3f;
   --soft: #e8f2ed;
-  --font-body: "General Sans", "Satoshi", "Avenir Next", "Segoe UI", Arial, sans-serif;
-  --font-display: "Editorial New", "Didot", "Bodoni 72", "Bodoni MT", Georgia, serif;
+  --font-body: Verdana, Geneva, Tahoma, sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
   background:
     radial-gradient(circle at top left, rgba(31, 111, 91, 0.12), transparent 28rem),
     linear-gradient(180deg, #fbf8f1 0%, var(--bg) 45%, #fff 100%);
@@ -17,7 +17,10 @@
   animation: ambientBackground 14s ease-in-out infinite alternate;
   color: var(--ink);
   font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
   min-height: 100vh;
+  text-rendering: optimizeLegibility;
 }
 
 @keyframes ambientBackground {
@@ -38,6 +41,7 @@
 .shop-app select,
 .shop-app textarea {
   font: inherit;
+  letter-spacing: 0;
 }
 
 .atelier-bar {
@@ -145,7 +149,7 @@
 .brand strong {
   font-family: var(--font-display);
   font-size: 18px;
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .brand small {
@@ -255,7 +259,7 @@
 .detail-info h1 {
   font-family: var(--font-display);
   font-size: clamp(42px, 6vw, 76px);
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0;
   line-height: 1.02;
   margin: 0;
@@ -316,7 +320,7 @@
   color: var(--ink);
   font-family: var(--font-display);
   font-size: 28px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1;
   text-transform: none;
 }
@@ -484,7 +488,7 @@
 .site-footer h2 {
   font-family: var(--font-display);
   font-size: clamp(28px, 3vw, 40px);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.15;
   margin: 0;
 }
@@ -537,7 +541,7 @@
 .category-card strong {
   font-family: var(--font-display);
   font-size: 28px;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .category-card small {
@@ -2613,6 +2617,19 @@
   }
   .portal-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .quick-switcher-collapsed-btn,
+  .quick-role-switcher-widget {
+    left: 20px;
+    top: 250px;
+    z-index: 40;
+  }
+
+  .quick-role-switcher-widget {
+    width: min(280px, calc(100vw - 40px));
   }
 }
 

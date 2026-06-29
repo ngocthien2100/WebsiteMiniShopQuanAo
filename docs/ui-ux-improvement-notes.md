@@ -1,19 +1,19 @@
-# UI/UX improvement notes
+# Ghi chú cải thiện UI/UX
 
-The storefront now uses a fashion-commerce direction inspired by luxury retail patterns without copying any specific brand assets.
+Trang bán hàng đang đi theo hướng thương mại thời trang hiện đại, tham khảo các mô hình bán lẻ cao cấp nhưng không sao chép tài sản thương hiệu cụ thể.
 
-## Applied changes
+## Thay đổi đã áp dụng
 
-- Added a slim top atelier bar for shipping, return, and studio messaging.
-- Refined the header navigation to feel more editorial and less dashboard-like.
-- Reworked the homepage hero into a lookbook-style composition with stronger display typography, metrics, and a cleaner CTA hierarchy.
-- Added an editorial strip for shopping intents such as new arrivals and campus essentials.
-- Changed category cards from simple tiles into "shop by edit" panels with short buying-context copy.
-- Simplified product cards so imagery, product name, price, variants, and action are clearer.
-- Added a catalog toolbar and refined filter copy to make the product listing feel closer to a real fashion storefront.
+- Thêm thanh thông báo mỏng phía trên cho thông tin vận chuyển, đổi trả và nhận diện studio.
+- Tinh chỉnh header để cảm giác thời trang hơn, bớt giống dashboard quản trị.
+- Làm lại hero trang chủ theo hướng lookbook, nhấn mạnh hình ảnh, typography và lời kêu gọi hành động rõ hơn.
+- Thêm dải gợi ý mua sắm như sản phẩm mới, đồ đi học, đồ đi làm và phụ kiện.
+- Chuyển thẻ danh mục từ ô đơn giản sang nhóm phong cách có mô tả ngắn theo ngữ cảnh mua hàng.
+- Tối giản thẻ sản phẩm để ảnh, tên sản phẩm, giá, lựa chọn và nút mua rõ hơn.
+- Thêm thanh thông tin danh mục và chỉnh lại nội dung bộ lọc để trang sản phẩm giống trải nghiệm bán hàng thật hơn.
 
-## Design constraints
+## Ràng buộc thiết kế
 
-- No Gucci logo, copy, imagery, or proprietary visual identity was copied.
-- MiniStyle keeps its own palette: warm canvas, forest green, soft cream, muted ink, and brown accent.
-- The UI still supports the existing student project requirements: Supabase Auth, roles, cart, orders, admin/staff/customer portals, and n8n chatbot.
+- Không sao chép logo, nội dung, hình ảnh hoặc nhận diện độc quyền của Gucci.
+- MiniStyle giữ bảng màu riêng: nền ấm, xanh rừng, kem nhẹ, chữ trầm và điểm nhấn nâu.
+- Giao diện vẫn đáp ứng yêu cầu đồ án: xác thực Supabase, phân quyền, giỏ hàng, đơn hàng, trang quản trị/nhân viên/khách hàng và chatbot n8n.

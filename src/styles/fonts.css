@@ -1,50 +1,8 @@
 /*
   MiniStyle typography direction:
-  - Display: Editorial New
-  - Body/UI: General Sans
+  - Display headings: Georgia
+  - Body/UI: Verdana
 
-  Add licensed .woff2 files to public/fonts/ and uncomment these @font-face
-  blocks when the files are available.
-*/
-
-/*
-@font-face {
-  font-family: "General Sans";
-  src: url("/fonts/GeneralSans-Regular.woff2") format("woff2");
-  font-display: swap;
-  font-style: normal;
-  font-weight: 400;
-}
-
-@font-face {
-  font-family: "General Sans";
-  src: url("/fonts/GeneralSans-Medium.woff2") format("woff2");
-  font-display: swap;
-  font-style: normal;
-  font-weight: 500;
-}
-
-@font-face {
-  font-family: "General Sans";
-  src: url("/fonts/GeneralSans-Semibold.woff2") format("woff2");
-  font-display: swap;
-  font-style: normal;
-  font-weight: 600 800;
-}
-
-@font-face {
-  font-family: "Editorial New";
-  src: url("/fonts/EditorialNew-Regular.woff2") format("woff2");
-  font-display: swap;
-  font-style: normal;
-  font-weight: 400;
-}
-
-@font-face {
-  font-family: "Editorial New";
-  src: url("/fonts/EditorialNew-Ultralight.woff2") format("woff2");
-  font-display: swap;
-  font-style: normal;
-  font-weight: 300;
-}
+  These are system fonts, so the project does not need Google Fonts or
+  self-hosted commercial font files for the main website typography.
 */

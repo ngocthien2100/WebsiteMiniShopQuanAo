@@ -1769,7 +1769,7 @@ function Heading8() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="Heading 4">
       <div className="[word-break:break-word] flex flex-col font-['Inter:Regular',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#051125] text-[16px] w-full">
-        <p className="leading-[24px]">Social Media</p>
+        <p className="leading-[24px]">Mạng xã hội</p>
       </div>
     </div>
   );
@@ -1785,32 +1785,10 @@ function Item3() {
   );
 }
 
-function Item4() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="Item">
-      <div className="[word-break:break-word] flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#45474d] text-[16px] w-full">
-        <p className="leading-[24px]">Instagram</p>
-      </div>
-    </div>
-  );
-}
-
-function Item5() {
-  return (
-    <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="Item">
-      <div className="[word-break:break-word] flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#45474d] text-[16px] w-full">
-        <p className="leading-[24px]">TikTok</p>
-      </div>
-    </div>
-  );
-}
-
 function List1() {
   return (
     <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full" data-name="List">
       <Item3 />
-      <Item4 />
-      <Item5 />
     </div>
   );
 }
@@ -1979,7 +1957,7 @@ function Link4() {
   return (
     <div className="h-[16.8px] relative shrink-0 w-[82.5px]" data-name="Link">
       <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Regular',sans-serif] font-medium justify-center leading-[0] left-0 not-italic text-[#45474d] text-[14px] top-[7.5px] tracking-[0.7px] whitespace-nowrap">
-        <p className="leading-[16.8px]">Collections</p>
+        <p className="leading-[16.8px]">Bộ sưu tập</p>
       </div>
     </div>
   );

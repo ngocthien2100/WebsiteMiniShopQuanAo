@@ -16,6 +16,19 @@ export type Product = {
   tags: string[];
 };
 
+export const createProductId = (name: string) => {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+  return `${slug || "san-pham"}-${Date.now().toString().slice(-6)}`;
+};
+
 export const products: Product[] = [
   {
     id: "ao-thun-basic-cotton",

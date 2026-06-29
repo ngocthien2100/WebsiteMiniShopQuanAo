@@ -97,6 +97,7 @@ function App() {
   const [category, setCategory] = useState<"all" | ProductCategory>("all");
   const [maxPrice, setMaxPrice] = useState(500000);
   const [orderDone, setOrderDone] = useState(false);
+  const [orderError, setOrderError] = useState("");
 
   // Form đặt hàng
   const [customerName, setCustomerName] = useState("");
@@ -169,6 +170,7 @@ function App() {
   function navigate(next: Page) {
     setPage(next);
     setOrderDone(false);
+    setOrderError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -212,6 +214,7 @@ function App() {
   // Đặt hàng thực tế & Lưu vào Mock DB
   async function submitOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setOrderError("");
 
     // Tạo đơn hàng mới
     const newOrder: Order = {
@@ -227,20 +230,24 @@ function App() {
       createdAt: new Date().toISOString(),
     };
 
-    await createOrder(newOrder);
+    try {
+      await createOrder(newOrder);
 
-    setCart([]);
-    setOrderDone(true);
+      setCart([]);
+      setOrderDone(true);
 
-    // Chuyển hướng
-    setTimeout(() => {
-      if (currentUser) {
-        navigate("customer"); // Chuyển sang quản lý đơn hàng của Customer
-      } else {
-        alert("Đặt hàng thành công! (Bạn đang mua sắm với tư cách khách)");
-        navigate("home");
-      }
-    }, 1500);
+      // Chuyển hướng
+      setTimeout(() => {
+        if (currentUser) {
+          navigate("customer"); // Chuyển sang quản lý đơn hàng của Customer
+        } else {
+          alert("Đặt hàng thành công! (Bạn đang mua sắm với tư cách khách)");
+          navigate("home");
+        }
+      }, 1500);
+    } catch (error) {
+      setOrderError(error instanceof Error ? error.message : "Không thể lưu đơn hàng.");
+    }
   }
 
   const handleLogout = async () => {
@@ -336,6 +343,7 @@ function App() {
                 removeCartItem={removeCartItem}
                 submitOrder={submitOrder}
                 orderDone={orderDone}
+                orderError={orderError}
                 navigate={navigate}
                 currentUser={currentUser}
                 customerName={customerName}
@@ -873,6 +881,7 @@ function CartPage({
   removeCartItem,
   submitOrder,
   orderDone,
+  orderError,
   navigate,
   currentUser,
   customerName,
@@ -890,6 +899,7 @@ function CartPage({
   removeCartItem: (productId: string) => void;
   submitOrder: (event: FormEvent<HTMLFormElement>) => void;
   orderDone: boolean;
+  orderError: string;
   navigate: (page: Page) => void;
   currentUser: User | null;
   customerName: string;
@@ -1011,6 +1021,12 @@ function CartPage({
           <button className="primary-button full-width" disabled={cart.length === 0} type="submit">
             Đặt hàng
           </button>
+
+          {orderError && (
+            <div className="modal-error">
+              {orderError}
+            </div>
+          )}
 
           {orderDone && (
             <div className="success-message">

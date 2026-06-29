@@ -23,6 +23,8 @@ Supabase được chọn vì một project có sẵn Postgres database, Auth, St
 3. Copy toàn bộ nội dung trong `supabase/schema.sql`.
 4. Chạy script một lần để tạo bảng và seed dữ liệu.
 
+Nếu project Supabase đã được tạo từ phiên bản schema cũ, hãy chạy thêm file `supabase/patch-product-management-and-orders.sql`. Patch này bổ sung quyền cho Admin/Nhân viên thêm, sửa, xóa sản phẩm và bổ sung policy đọc lịch sử đơn hàng.
+
 Các bảng chính:
 
 - `profiles`: hồ sơ người dùng, họ tên, email, số điện thoại, ngày sinh, giới tính, địa chỉ giao hàng mặc định, role `admin | staff | customer`, trạng thái tài khoản.

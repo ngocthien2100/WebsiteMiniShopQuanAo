@@ -12,7 +12,7 @@ import {
   User,
   getMockProducts,
 } from "@/shared/data/mockDb";
-import { Product, ProductCategory, formatCurrency } from "@/shared/data/products";
+import { Product, ProductCategory, createProductId, formatCurrency } from "@/shared/data/products";
 import { getDatabaseModeLabel, loadProducts, saveProducts } from "@/shared/services/shopRepository";
 
 interface StaffPanelProps {
@@ -23,6 +23,8 @@ interface StaffPanelProps {
 
 export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: StaffPanelProps) {
   const [products, setProducts] = useState<Product[]>(() => getMockProducts());
+  const [formError, setFormError] = useState("");
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +70,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
   // Logic thêm và chỉnh sửa sản phẩm
   const handleOpenAddProduct = () => {
     setEditingProduct(null);
+    setFormError("");
     setProductForm({
       id: "",
       name: "",
@@ -85,6 +88,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
 
   const handleOpenEditProduct = (prod: Product) => {
     setEditingProduct(prod);
+    setFormError("");
     setProductForm({
       id: prod.id,
       name: prod.name,
@@ -102,6 +106,8 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
+    setIsSavingProduct(true);
     
     const colorsArray = productForm.colors.split(",").map((c) => c.trim()).filter(Boolean);
     const sizesArray = productForm.sizes.split(",").map((s) => s.trim()).filter(Boolean);
@@ -111,58 +117,57 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
     if (productForm.category === "vay") categoryLabel = "Váy";
     if (productForm.category === "phu-kien") categoryLabel = "Phụ kiện";
 
-    if (editingProduct) {
-      // Chỉnh sửa sản phẩm
-      const updated = products.map((p) => {
-        if (p.id === editingProduct.id) {
-          return {
-            ...p,
-            name: productForm.name,
-            category: productForm.category,
-            categoryLabel,
-            price: Number(productForm.price),
-            image: productForm.image,
-            badge: productForm.badge || undefined,
-            colors: colorsArray,
-            sizes: sizesArray,
-            shortDescription: productForm.shortDescription,
-            description: productForm.description,
-          };
-        }
-        return p;
-      });
-      setProducts(updated);
-      await saveProducts(updated);
-    } else {
-      // Thêm sản phẩm mới
-      const newId = productForm.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "") + "-" + Date.now().toString().slice(-4);
+    try {
+      if (editingProduct) {
+        const updated = products.map((p) => {
+          if (p.id === editingProduct.id) {
+            return {
+              ...p,
+              name: productForm.name,
+              category: productForm.category,
+              categoryLabel,
+              price: Number(productForm.price),
+              image: productForm.image,
+              badge: productForm.badge || undefined,
+              colors: colorsArray,
+              sizes: sizesArray,
+              shortDescription: productForm.shortDescription,
+              description: productForm.description,
+            };
+          }
+          return p;
+        });
+        const saved = await saveProducts(updated);
+        setProducts(saved);
+      } else {
+        const newProduct: Product = {
+          id: createProductId(productForm.name),
+          name: productForm.name,
+          category: productForm.category,
+          categoryLabel,
+          price: Number(productForm.price),
+          image: productForm.image,
+          badge: productForm.badge || undefined,
+          colors: colorsArray,
+          sizes: sizesArray,
+          shortDescription: productForm.shortDescription,
+          description: productForm.description,
+          suitableFor: ["Sinh viên", "Học sinh", "Đi chơi"],
+          tags: [productForm.category, "mới"],
+        };
 
-      const newProduct: Product = {
-        id: newId,
-        name: productForm.name,
-        category: productForm.category,
-        categoryLabel,
-        price: Number(productForm.price),
-        image: productForm.image,
-        badge: productForm.badge || undefined,
-        colors: colorsArray,
-        sizes: sizesArray,
-        shortDescription: productForm.shortDescription,
-        description: productForm.description,
-        suitableFor: ["Sinh viên", "Học sinh", "Đi chơi"],
-        tags: [productForm.category, "mới"],
-      };
+        const updated = [newProduct, ...products];
+        const saved = await saveProducts(updated);
+        setProducts(saved);
+      }
 
-      const updated = [newProduct, ...products];
-      setProducts(updated);
-      await saveProducts(updated);
+      setIsProductModalOpen(false);
+      setEditingProduct(null);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Không thể lưu sản phẩm.");
+    } finally {
+      setIsSavingProduct(false);
     }
-
-    setIsProductModalOpen(false);
-    setEditingProduct(null);
   };
 
   return (
@@ -276,6 +281,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
             </div>
 
             <form onSubmit={handleSaveProduct} className="modal-form">
+              {formError && <div className="modal-error">{formError}</div>}
               <div className="form-row">
                 <label>
                   Tên sản phẩm *
@@ -374,11 +380,16 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
               </label>
 
               <div className="modal-actions">
-                <button type="button" className="secondary-button" onClick={() => setIsProductModalOpen(false)}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={isSavingProduct}
+                  onClick={() => setIsProductModalOpen(false)}
+                >
                   Hủy bỏ
                 </button>
-                <button type="submit" className="primary-button">
-                  <Save size={16} /> Lưu lại
+                <button type="submit" className="primary-button" disabled={isSavingProduct}>
+                  <Save size={16} /> {isSavingProduct ? "Đang lưu..." : "Lưu lại"}
                 </button>
               </div>
             </form>

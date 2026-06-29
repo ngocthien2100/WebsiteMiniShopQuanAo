@@ -101,25 +101,42 @@ export async function loadProducts(): Promise<Product[]> {
 }
 
 export async function saveProducts(products: Product[]): Promise<Product[]> {
-  saveMockProducts(products);
-
   if (!isSupabaseConfigured || !supabase) {
+    saveMockProducts(products);
     return products;
   }
 
   const { error } = await supabase.from("products").upsert(products.map(toProductRow));
   if (error) {
-    console.warn("Supabase products save failed, kept local data:", error.message);
+    throw new Error(`Không thể lưu sản phẩm lên Supabase: ${error.message}`);
   }
 
+  saveMockProducts(products);
   return products;
 }
 
-export async function createOrder(order: Order): Promise<Order> {
-  const localOrders = [...getMockOrders(), order];
-  saveMockOrders(localOrders);
-
+export async function deleteProduct(productId: string): Promise<void> {
   if (!isSupabaseConfigured || !supabase) {
+    saveMockProducts(getMockProducts().filter((product) => product.id !== productId));
+    return;
+  }
+
+  const { error } = await supabase
+    .from("products")
+    .update({ is_active: false })
+    .eq("id", productId);
+
+  if (error) {
+    throw new Error(`Không thể xóa sản phẩm trên Supabase: ${error.message}`);
+  }
+
+  saveMockProducts(getMockProducts().filter((product) => product.id !== productId));
+}
+
+export async function createOrder(order: Order): Promise<Order> {
+  if (!isSupabaseConfigured || !supabase) {
+    const localOrders = [...getMockOrders(), order];
+    saveMockOrders(localOrders);
     return order;
   }
 
@@ -136,8 +153,7 @@ export async function createOrder(order: Order): Promise<Order> {
   });
 
   if (orderError) {
-    console.warn("Supabase order save failed, kept local order:", orderError.message);
-    return order;
+    throw new Error(`Không thể lưu đơn hàng lên Supabase: ${orderError.message}`);
   }
 
   const { error: itemsError } = await supabase.from("order_items").insert(
@@ -152,9 +168,11 @@ export async function createOrder(order: Order): Promise<Order> {
   );
 
   if (itemsError) {
-    console.warn("Supabase order items save failed:", itemsError.message);
+    throw new Error(`Không thể lưu chi tiết đơn hàng lên Supabase: ${itemsError.message}`);
   }
 
+  const localOrders = [...getMockOrders(), order];
+  saveMockOrders(localOrders);
   return order;
 }
 
@@ -195,19 +213,23 @@ export async function loadOrders(): Promise<Order[]> {
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
-  const updatedLocalOrders = getMockOrders().map((order) =>
-    order.id === orderId ? { ...order, status } : order,
-  );
-  saveMockOrders(updatedLocalOrders);
-
   if (!isSupabaseConfigured || !supabase) {
+    const updatedLocalOrders = getMockOrders().map((order) =>
+      order.id === orderId ? { ...order, status } : order,
+    );
+    saveMockOrders(updatedLocalOrders);
     return;
   }
 
   const { error } = await supabase.from("orders").update({ status }).eq("id", orderId);
   if (error) {
-    console.warn("Supabase order status update failed:", error.message);
+    throw new Error(`Không thể cập nhật trạng thái đơn hàng: ${error.message}`);
   }
+
+  const updatedLocalOrders = getMockOrders().map((order) =>
+    order.id === orderId ? { ...order, status } : order,
+  );
+  saveMockOrders(updatedLocalOrders);
 }
 
 export function getDatabaseModeLabel() {

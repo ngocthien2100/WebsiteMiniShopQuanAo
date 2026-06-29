@@ -1988,6 +1988,17 @@
   overflow-y: auto;
 }
 
+.modal-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: 10px 12px;
+}
+
 .modal-form label {
   display: flex;
   flex-direction: column;

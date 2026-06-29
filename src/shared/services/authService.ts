@@ -198,13 +198,6 @@ export async function logoutAuthUser() {
   setLoggedUser(null);
 }
 
-export function getDemoUserByRole(role: UserRole): User | null {
-  const user = getMockUsers().find((item) => item.role === role && item.status === "active");
-  if (!user) return null;
-  setLoggedUser(user);
-  return user;
-}
-
 export async function loadUsers(): Promise<User[]> {
   if (!isSupabaseConfigured || !supabase) {
     return getMockUsers();
@@ -235,7 +228,7 @@ export async function updateUserRole(userId: string, role: UserRole): Promise<vo
 
   const { error } = await supabase.from("profiles").update({ role }).eq("id", userId);
   if (error) {
-    console.warn("Supabase user role update failed:", error.message);
+    throw new Error(`Không thể cập nhật vai trò tài khoản: ${error.message}`);
   }
 }
 
@@ -251,6 +244,6 @@ export async function updateUserStatus(userId: string, status: UserStatus): Prom
 
   const { error } = await supabase.from("profiles").update({ status }).eq("id", userId);
   if (error) {
-    console.warn("Supabase user status update failed:", error.message);
+    throw new Error(`Không thể cập nhật trạng thái tài khoản: ${error.message}`);
   }
 }

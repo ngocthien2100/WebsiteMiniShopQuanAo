@@ -26,8 +26,9 @@ import {
   getMockOrders,
   getMockProducts,
 } from "@/shared/data/mockDb";
-import { Product, ProductCategory, formatCurrency } from "@/shared/data/products";
+import { Product, ProductCategory, createProductId, formatCurrency } from "@/shared/data/products";
 import {
+  deleteProduct,
   getDatabaseModeLabel,
   loadOrders,
   loadProducts,
@@ -60,6 +61,8 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
   const [users, setUsers] = useState<User[]>(() => getMockUsers());
   const [orders, setOrders] = useState<Order[]>(() => getMockOrders());
   const [products, setProducts] = useState<Product[]>(() => getMockProducts());
+  const [formError, setFormError] = useState("");
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -151,14 +154,21 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
 
   // 2. ORDER MANAGEMENT LOGIC
   const handleUpdateOrderStatus = async (orderId: string, status: OrderStatus) => {
+    const previous = orders;
     const updated = orders.map((o) => (o.id === orderId ? { ...o, status } : o));
     setOrders(updated);
-    await updateOrderStatus(orderId, status);
+    try {
+      await updateOrderStatus(orderId, status);
+    } catch (error) {
+      setOrders(previous);
+      alert(error instanceof Error ? error.message : "Không thể cập nhật trạng thái đơn hàng.");
+    }
   };
 
   // 3. PRODUCT CRUD LOGIC
   const handleOpenAddProduct = () => {
     setEditingProduct(null);
+    setFormError("");
     setProductForm({
       id: "",
       name: "",
@@ -176,6 +186,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
 
   const handleOpenEditProduct = (prod: Product) => {
     setEditingProduct(prod);
+    setFormError("");
     setProductForm({
       id: prod.id,
       name: prod.name,
@@ -193,6 +204,8 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
+    setIsSavingProduct(true);
     
     const colorsArray = productForm.colors.split(",").map((c) => c.trim()).filter(Boolean);
     const sizesArray = productForm.sizes.split(",").map((s) => s.trim()).filter(Boolean);
@@ -202,65 +215,67 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
     if (productForm.category === "vay") categoryLabel = "Váy";
     if (productForm.category === "phu-kien") categoryLabel = "Phụ kiện";
 
-    if (editingProduct) {
-      // Chỉnh sửa sản phẩm
-      const updated = products.map((p) => {
-        if (p.id === editingProduct.id) {
-          return {
-            ...p,
-            name: productForm.name,
-            category: productForm.category,
-            categoryLabel,
-            price: Number(productForm.price),
-            image: productForm.image,
-            badge: productForm.badge || undefined,
-            colors: colorsArray,
-            sizes: sizesArray,
-            shortDescription: productForm.shortDescription,
-            description: productForm.description,
-          };
-        }
-        return p;
-      });
-      setProducts(updated);
-      await saveProducts(updated);
-    } else {
-      // Thêm sản phẩm mới
-      const newId = productForm.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "") + "-" + Date.now().toString().slice(-4);
+    try {
+      if (editingProduct) {
+        const updated = products.map((p) => {
+          if (p.id === editingProduct.id) {
+            return {
+              ...p,
+              name: productForm.name,
+              category: productForm.category,
+              categoryLabel,
+              price: Number(productForm.price),
+              image: productForm.image,
+              badge: productForm.badge || undefined,
+              colors: colorsArray,
+              sizes: sizesArray,
+              shortDescription: productForm.shortDescription,
+              description: productForm.description,
+            };
+          }
+          return p;
+        });
+        const saved = await saveProducts(updated);
+        setProducts(saved);
+      } else {
+        const newProduct: Product = {
+          id: createProductId(productForm.name),
+          name: productForm.name,
+          category: productForm.category,
+          categoryLabel,
+          price: Number(productForm.price),
+          image: productForm.image,
+          badge: productForm.badge || undefined,
+          colors: colorsArray,
+          sizes: sizesArray,
+          shortDescription: productForm.shortDescription,
+          description: productForm.description,
+          suitableFor: ["Sinh viên", "Học sinh", "Đi chơi"],
+          tags: [productForm.category, "mới"],
+        };
 
-      const newProduct: Product = {
-        id: newId,
-        name: productForm.name,
-        category: productForm.category,
-        categoryLabel,
-        price: Number(productForm.price),
-        image: productForm.image,
-        badge: productForm.badge || undefined,
-        colors: colorsArray,
-        sizes: sizesArray,
-        shortDescription: productForm.shortDescription,
-        description: productForm.description,
-        suitableFor: ["Sinh viên", "Học sinh", "Đi chơi"],
-        tags: [productForm.category, "mới"],
-      };
+        const updated = [newProduct, ...products];
+        const saved = await saveProducts(updated);
+        setProducts(saved);
+      }
 
-      const updated = [newProduct, ...products];
-      setProducts(updated);
-      await saveProducts(updated);
+      setIsProductModalOpen(false);
+      setEditingProduct(null);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Không thể lưu sản phẩm.");
+    } finally {
+      setIsSavingProduct(false);
     }
-
-    setIsProductModalOpen(false);
-    setEditingProduct(null);
   };
 
-  const handleDeleteProduct = (productId: string) => {
+  const handleDeleteProduct = async (productId: string) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-      const updated = products.filter((p) => p.id !== productId);
-      setProducts(updated);
-      saveProducts(updated);
+      try {
+        await deleteProduct(productId);
+        setProducts((current) => current.filter((p) => p.id !== productId));
+      } catch (error) {
+        alert(error instanceof Error ? error.message : "Không thể xóa sản phẩm.");
+      }
     }
   };
 
@@ -271,9 +286,15 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
       alert("Bạn không thể tự thay đổi vai trò của chính mình!");
       return;
     }
+    const previous = users;
     const updated = users.map((u) => (u.id === userId ? { ...u, role } : u));
     setUsers(updated);
-    await updateUserRole(userId, role);
+    try {
+      await updateUserRole(userId, role);
+    } catch (error) {
+      setUsers(previous);
+      alert(error instanceof Error ? error.message : "Không thể cập nhật vai trò tài khoản.");
+    }
   };
 
   const handleToggleUserStatus = async (userId: string) => {
@@ -281,6 +302,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
       alert("Bạn không thể tự khóa tài khoản của chính mình!");
       return;
     }
+    const previous = users;
     const updated = users.map((u) => {
       if (u.id === userId) {
         const nextStatus = u.status === "active" ? "blocked" : "active";
@@ -291,7 +313,12 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
     setUsers(updated);
     const target = updated.find((user) => user.id === userId);
     if (target) {
-      await updateUserStatus(userId, target.status);
+      try {
+        await updateUserStatus(userId, target.status);
+      } catch (error) {
+        setUsers(previous);
+        alert(error instanceof Error ? error.message : "Không thể cập nhật trạng thái tài khoản.");
+      }
     }
   };
 
@@ -625,6 +652,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
             </div>
 
             <form onSubmit={handleSaveProduct} className="modal-form">
+              {formError && <div className="modal-error">{formError}</div>}
               <div className="form-row">
                 <label>
                   Tên sản phẩm *
@@ -723,11 +751,16 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
               </label>
 
               <div className="modal-actions">
-                <button type="button" className="secondary-button" onClick={() => setIsProductModalOpen(false)}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={isSavingProduct}
+                  onClick={() => setIsProductModalOpen(false)}
+                >
                   Hủy bỏ
                 </button>
-                <button type="submit" className="primary-button">
-                  <Save size={16} /> Lưu lại
+                <button type="submit" className="primary-button" disabled={isSavingProduct}>
+                  <Save size={16} /> {isSavingProduct ? "Đang lưu..." : "Lưu lại"}
                 </button>
               </div>
             </form>

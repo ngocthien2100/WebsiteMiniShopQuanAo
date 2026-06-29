@@ -22,8 +22,6 @@ import {
   User,
   Order,
   initMockDb,
-  getMockUsers,
-  setLoggedUser,
   getMockOrders,
 } from "@/shared/data/mockDb";
 import { createOrder, loadProducts } from "@/shared/services/shopRepository";
@@ -417,26 +415,6 @@ function App() {
 
       {!isDashboardView && <N8nChatWidget />}
       {!isDashboardView && <Footer navigate={navigate} />}
-
-      {/* QUICK ROLE SWITCHER FOR DEMO/TESTING */}
-      <QuickRoleSwitcher 
-        currentUser={currentUser} 
-        onSwitchRole={(role) => {
-          if (role === null) {
-            handleLogout();
-            return;
-          }
-          // Tìm user tương ứng trong Mock DB
-          const users = getMockUsers();
-          const target = users.find(u => u.role === role);
-          if (target) {
-            setLoggedUser(target);
-            setCurrentUser(target);
-            setCustomerName(target.name);
-            navigate(role === "admin" ? "admin" : role === "staff" ? "staff" : "home");
-          }
-        }}
-      />
     </div>
   );
 }
@@ -1120,67 +1098,6 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
         <span>Facebook</span>
       </div>
     </footer>
-  );
-}
-
-// BỘ CHUYỂN VAI TRÒ NHANH PHỤC VỤ DEMO DỄ DÀNG
-function QuickRoleSwitcher({ 
-  currentUser, 
-  onSwitchRole 
-}: { 
-  currentUser: User | null;
-  onSwitchRole: (role: "admin" | "staff" | "customer" | null) => void;
-}) {
-  const [collapsed, setCollapsed] = useState(true);
-
-  if (collapsed) {
-    return (
-      <button 
-        className="quick-switcher-collapsed-btn" 
-        onClick={() => setCollapsed(false)}
-        title="Mở bảng chuyển quyền nhanh"
-      >
-        <Shield size={18} /> Chuyển Quyền
-      </button>
-    );
-  }
-
-  return (
-    <div className="quick-role-switcher-widget">
-      <div className="widget-header">
-        <strong>Bảng chuyển vai trò demo</strong>
-        <button onClick={() => setCollapsed(true)}>×</button>
-      </div>
-      <div className="widget-body">
-        <p>Hiện tại: <strong>{currentUser ? `${currentUser.name} (${roleLabels[currentUser.role]})` : "Khách vãng lai"}</strong></p>
-        <div className="switcher-btn-grid">
-          <button 
-            className={`btn-sw admin-sw ${currentUser?.role === "admin" ? "active" : ""}`}
-            onClick={() => onSwitchRole("admin")}
-          >
-            Quản trị
-          </button>
-          <button 
-            className={`btn-sw staff-sw ${currentUser?.role === "staff" ? "active" : ""}`}
-            onClick={() => onSwitchRole("staff")}
-          >
-            Nhân viên
-          </button>
-          <button 
-            className={`btn-sw customer-sw ${currentUser?.role === "customer" ? "active" : ""}`}
-            onClick={() => onSwitchRole("customer")}
-          >
-            Khách hàng
-          </button>
-          <button 
-            className="btn-sw logout-sw"
-            onClick={() => onSwitchRole(null)}
-          >
-            Đăng xuất
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 

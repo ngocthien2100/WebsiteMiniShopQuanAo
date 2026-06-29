@@ -1,7 +1,7 @@
 import { useState, FormEvent } from "react";
-import { LogIn, Key, Mail, ShieldAlert, UserCheck, Shield } from "lucide-react";
+import { LogIn, Key, Mail, ShieldAlert } from "lucide-react";
 import { User } from "@/shared/data/mockDb";
-import { getDemoUserByRole, loginWithEmail } from "@/shared/services/authService";
+import { loginWithEmail } from "@/shared/services/authService";
 
 interface LoginPageProps {
   onLoginSuccess: (user: User) => void;
@@ -39,36 +39,6 @@ export default function LoginPage({
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Hàm hỗ trợ đăng nhập nhanh phục vụ chấm điểm đồ án
-  const handleQuickLogin = (role: "admin" | "staff" | "customer") => {
-    let qEmail = "";
-    let qPass = "";
-
-    if (role === "admin") {
-      qEmail = "admin@ministyle.com";
-      qPass = "admin123";
-    } else if (role === "staff") {
-      qEmail = "staff@ministyle.com";
-      qPass = "staff123";
-    } else {
-      qEmail = "customer@ministyle.com";
-      qPass = "customer123";
-    }
-
-    setEmail(qEmail);
-    setPassword(qPass);
-    
-    // Tự động submit sau một nhịp thở nhỏ của CPU để người dùng nhìn thấy dữ liệu điền
-    setTimeout(() => {
-      const user = getDemoUserByRole(role);
-      if (user) {
-        onLoginSuccess(user);
-      } else {
-        setError("Không tìm thấy tài khoản demo local cho vai trò này.");
-      }
-    }, 100);
   };
 
   return (
@@ -136,38 +106,6 @@ export default function LoginPage({
           </button>
         </div>
 
-        {/* Khu vực Demo Đăng nhập nhanh - Cực kỳ hữu ích khi chấm điểm đồ án */}
-        <div className="quick-login-section">
-          <div className="quick-login-divider">
-            <span>Dành cho giảng viên: đăng nhập nhanh demo</span>
-          </div>
-          <div className="quick-login-buttons">
-            <button 
-              type="button" 
-              className="quick-btn quick-admin"
-              onClick={() => handleQuickLogin("admin")}
-              title="Tài khoản: admin@ministyle.com | MK: admin123"
-            >
-              <Shield size={16} /> Quản trị viên
-            </button>
-            <button 
-              type="button" 
-              className="quick-btn quick-staff"
-              onClick={() => handleQuickLogin("staff")}
-              title="Tài khoản: staff@ministyle.com | MK: staff123"
-            >
-              <UserCheck size={16} /> Nhân viên
-            </button>
-            <button 
-              type="button" 
-              className="quick-btn quick-customer"
-              onClick={() => handleQuickLogin("customer")}
-              title="Tài khoản: customer@ministyle.com | MK: customer123"
-            >
-              <UserCheck size={16} /> Khách hàng
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

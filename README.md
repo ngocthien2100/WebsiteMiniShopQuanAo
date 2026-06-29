@@ -1,6 +1,6 @@
 # MiniStyle - Website bán quần áo
 
-MiniStyle là website bán hàng mini xây bằng Vite + React. Dự án có giao diện cửa hàng, giỏ hàng, đặt hàng mẫu, đăng nhập/đăng ký, phân quyền quản trị viên/nhân viên/khách hàng và nút liên hệ Messenger dẫn tới Facebook Page của shop.
+MiniStyle là website bán hàng mini xây bằng Vite + React. Dự án có giao diện cửa hàng, giỏ hàng, đặt hàng mẫu, đăng nhập/đăng ký, phân quyền quản trị viên/nhân viên/khách hàng, widget chatbot n8n trực tiếp và nút Messenger dẫn tới Facebook Page của shop.
 
 ## Chạy dự án
 
@@ -47,10 +47,13 @@ Không đưa `service_role key` vào Vercel hoặc frontend.
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-public-anon-key
+VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
 VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
 ```
 
-`VITE_FACEBOOK_MESSENGER_URL` có thể là link `m.me` hoặc link Facebook Page. Nếu chưa có Page, có thể tạm để trống; nút chat sẽ mở Facebook mặc định.
+`VITE_N8N_CHATBOT_WEBHOOK` là Production Chat/Webhook URL của n8n. Nếu thiếu biến này, widget chatbot trực tiếp sẽ không hiển thị.
+
+`VITE_FACEBOOK_MESSENGER_URL` có thể là link `m.me` hoặc link Facebook Page. Nếu chưa có Page, có thể tạm để trống; nút Facebook sẽ mở trang Facebook mặc định.
 
 ### 3. Cấu hình Supabase Auth sau khi có domain Vercel
 
@@ -87,21 +90,26 @@ Vite chỉ đọc các biến `VITE_*` tại thời điểm build. Vì vậy sau
 4. Đăng nhập sau khi xác thực.
 5. Thêm sản phẩm vào giỏ và đặt hàng.
 6. Vào Supabase `Table Editor` kiểm tra bảng `orders` và `order_items`.
-7. Kiểm tra nút `Chat Facebook` có mở đúng Facebook Page/Messenger không.
+7. Kiểm tra widget chatbot trực tiếp có hiển thị và gửi tin nhắn về n8n không.
+8. Kiểm tra nút `Chat Facebook` có mở đúng Facebook Page/Messenger không.
 
 Tài khoản mới luôn mặc định là `customer`. Muốn tạo admin đầu tiên, đăng ký một tài khoản trước, sau đó nâng quyền trong Supabase bằng SQL theo hướng dẫn ở [docs/database-supabase-guide.md](./docs/database-supabase-guide.md).
 
-## Cấu hình Messenger
+## Cấu hình chatbot và Messenger
 
-Website hiện dùng nút Messenger cố định ở góc màn hình. Khi bấm vào, người dùng được chuyển sang Facebook Page hoặc link `m.me` để chat trực tiếp.
+Website hiện có hai widget ở góc màn hình:
+
+- Widget chatbot n8n trực tiếp trên web.
+- Nút Messenger mở Facebook Page hoặc link `m.me` trong tab mới.
 
 Tạo file `.env.local` ở thư mục gốc:
 
 ```env
+VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
 VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
 ```
 
-Nếu chưa có biến môi trường này, nút chat vẫn hiển thị nhưng chỉ mở trang Facebook mặc định.
+Nếu chưa có `VITE_N8N_CHATBOT_WEBHOOK`, widget n8n sẽ không hiển thị. Nếu chưa có `VITE_FACEBOOK_MESSENGER_URL`, nút Facebook vẫn hiển thị nhưng chỉ mở trang Facebook mặc định.
 
 ## Cấu hình database Supabase
 
@@ -112,6 +120,7 @@ Tạo `.env.local` theo mẫu:
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-public-anon-key
+VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
 VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
 ```
 
@@ -130,7 +139,7 @@ Font chữ được cấu hình theo hướng dễ đọc và phù hợp website
 ```text
 src/
   app/            App shell, routing state, cart, main CSS.
-  features/       Các màn hình nghiệp vụ theo vai trò.
+  features/       Các màn hình nghiệp vụ theo vai trò và widget chatbot.
   shared/services/ Lớp repository đọc/ghi Supabase, có fallback localStorage.
   shared/supabase/ Cấu hình Supabase client phía frontend.
   shared/data/    Dữ liệu sản phẩm, mock users, mock orders, localStorage helpers.
@@ -144,6 +153,7 @@ Chi tiết hơn: xem [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
 ## Tài liệu liên quan
 
 - [docs/database-supabase-guide.md](./docs/database-supabase-guide.md)
+- [docs/chatbot-n8n-guide.md](./docs/chatbot-n8n-guide.md)
 - [docs/email-template-guide.md](./docs/email-template-guide.md)
 - [docs/font-guide.md](./docs/font-guide.md)
 - [docs/ui-ux-improvement-notes.md](./docs/ui-ux-improvement-notes.md)

@@ -35,6 +35,7 @@ import ChangePasswordPage from "@/features/auth/ChangePasswordPage";
 import AdminPanel from "@/features/admin/AdminPanel";
 import StaffPanel from "@/features/staff/StaffPanel";
 import CustomerPanel from "@/features/customer/CustomerPanel";
+import N8nChatWidget from "@/features/chatbot/N8nChatWidget";
 
 import "./App.css";
 
@@ -437,6 +438,7 @@ function App() {
         </AnimatePresence>
       </main>
 
+      {!isDashboardView && <N8nChatWidget />}
       {!isDashboardView && <FacebookMessengerWidget />}
       {!isDashboardView && <Footer navigate={navigate} />}
     </div>
@@ -600,7 +602,7 @@ function HomePage({
           <h1>Thời trang hằng ngày, phối đồ có chủ đích.</h1>
           <p>
             Tuyển chọn các item dễ mặc cho sinh viên và người đi làm trẻ: rõ phom,
-            dễ phối, có dữ liệu sản phẩm thật và kênh tư vấn Messenger cho nhu cầu mua sắm.
+            dễ phối, có dữ liệu sản phẩm thật, chatbot trực tiếp và kênh Messenger cho nhu cầu mua sắm.
           </p>
           <div className="hero-actions">
             <button className="primary-button" onClick={() => navigate("products")} type="button">
@@ -634,7 +636,7 @@ function HomePage({
             transition={{ delay: 0.55, duration: 0.4 }}
           >
             <Sparkles size={18} />
-            Auth, database & Messenger đã sẵn sàng
+            Auth, database & chatbot đã sẵn sàng
           </motion.div>
         </motion.div>
       </section>
@@ -1016,8 +1018,8 @@ function CartPage({
                 <article>
                   <MessageCircle size={18} />
                   <div>
-                    <strong>Messenger hỗ trợ</strong>
-                    <p>Có thể nhắn tin hỏi về size, ngân sách, cách đặt hàng và chính sách đổi trả.</p>
+                    <strong>Chat hỗ trợ</strong>
+                    <p>Có thể hỏi chatbot trực tiếp hoặc nhắn Messenger về size, ngân sách, cách đặt hàng và chính sách đổi trả.</p>
                   </div>
                 </article>
               </div>
@@ -1150,7 +1152,7 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
     <footer className="site-footer">
       <div>
         <h2>MiniStyle</h2>
-        <p>Website bán hàng mini theo hướng thương mại thời trang, có xác thực Supabase, cơ sở dữ liệu và kênh tư vấn qua Messenger.</p>
+        <p>Website bán hàng mini theo hướng thương mại thời trang, có xác thực Supabase, cơ sở dữ liệu, chatbot trực tiếp và kênh tư vấn Messenger.</p>
       </div>
       <div>
         <strong>Liên kết</strong>

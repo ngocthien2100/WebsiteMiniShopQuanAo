@@ -1020,6 +1020,39 @@
   color: var(--muted);
 }
 
+.n8n-chat-host {
+  --chat--color--primary: var(--brand-dark);
+  --chat--color--primary-shade-50: var(--brand);
+  --chat--color--primary--shade-100: #0d312a;
+  --chat--color--secondary: var(--brand);
+  --chat--color-secondary-shade-50: var(--brand-dark);
+  --chat--border-radius: 16px;
+  --chat--font-family: var(--font-body);
+  --chat--window--width: min(410px, calc(100vw - 32px));
+  --chat--window--height: min(560px, calc(100vh - 180px));
+  --chat--window--bottom: 92px;
+  --chat--window--right: 22px;
+  --chat--window--border-radius: 18px;
+  --chat--window--border: 1px solid var(--line);
+  --chat--header--background: var(--brand-dark);
+  --chat--header--color: white;
+  --chat--heading--font-size: 1.25rem;
+  --chat--subtitle--line-height: 1.5;
+  --chat--body--background: #f7f3ea;
+  --chat--message--bot--background: white;
+  --chat--message--bot--color: var(--ink);
+  --chat--message--user--background: var(--brand);
+  --chat--message--user--color: white;
+  --chat--toggle--size: 58px;
+  --chat--toggle--background: var(--brand-dark);
+  --chat--toggle--hover--background: var(--brand);
+  --chat--toggle--active--background: #0d312a;
+  --chat--toggle--bottom: 92px;
+  --chat--toggle--right: 22px;
+  --chat--input--send--button--color: var(--brand-dark);
+  --chat--input--send--button--color-hover: var(--brand);
+}
+
 .facebook-chat-link {
   align-items: center;
   background: #0866ff;
@@ -1089,6 +1122,14 @@
     bottom: 16px;
     padding: 14px;
     right: 16px;
+  }
+
+  .n8n-chat-host {
+    --chat--window--height: min(520px, calc(100vh - 168px));
+    --chat--window--bottom: 84px;
+    --chat--window--right: 16px;
+    --chat--toggle--bottom: 84px;
+    --chat--toggle--right: 16px;
   }
 
   .facebook-chat-link span {

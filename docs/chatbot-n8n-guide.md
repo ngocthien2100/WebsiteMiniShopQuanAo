@@ -1,8 +1,29 @@
-# Ghi chu chatbot n8n cho MiniStyle
+# Huong dan chatbot n8n va Messenger cho MiniStyle
 
-Tai lieu nay giu lai phan thiet ke chatbot n8n neu sau nay can mo rong. Phien ban frontend hien tai khong con nhung widget chat truc tiep vao website; website dang dung nut Messenger de chuyen nguoi dung sang Facebook Page chat truc tiep.
+Website hien co hai widget chat:
 
-## 1. Luong dang dung hien tai
+- Widget chatbot n8n truc tiep tren web.
+- Nut Facebook Messenger de chuyen nguoi dung sang Facebook Page hoac link `m.me`.
+
+## 1. Luong chatbot n8n
+
+```text
+Nguoi dung tren website
+-> Widget n8n chat
+-> n8n Chat Trigger URL
+-> AI Agent / Chain trong n8n
+-> Tra loi ve widget tren website
+```
+
+Frontend can bien moi truong:
+
+```env
+VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
+```
+
+Neu chua cau hinh bien nay, widget n8n se khong hien thi.
+
+## 2. Luong Messenger
 
 ```text
 Nguoi dung tren website
@@ -11,17 +32,17 @@ Nguoi dung tren website
 -> Chat truc tiep tren Messenger
 ```
 
-Frontend chi can bien moi truong:
+Frontend can bien moi truong:
 
 ```env
 VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
 ```
 
-Neu chua cau hinh bien nay, nut chat van hien thi nhung chi mo trang Facebook mac dinh.
+Neu chua cau hinh bien nay, nut Facebook van hien thi nhung chi mo trang Facebook mac dinh.
 
-## 2. Neu muon dung lai n8n sau nay
+## 3. Yeu cau workflow n8n
 
-n8n van co the dung lam he thong xu ly hoi dap rieng, nhung nen de no o tang workflow/backend thay vi nhung widget truc tiep vao website. API key cua AI phai de trong n8n hoac server rieng, khong dua vao code React.
+API key cua AI phai de trong n8n hoac server rieng, khong dua vao code React.
 
 Workflow n8n co the co cau truc toi thieu:
 
@@ -38,7 +59,7 @@ Trong Chat Trigger:
 - Dung Production Chat URL, khong dung test URL.
 - Workflow phai Active.
 
-## 3. Du lieu nen cho chatbot truy van
+## 4. Du lieu nen cho chatbot truy van
 
 n8n khong nen phu thuoc vao du lieu gui tu frontend. Neu dung chatbot AI, workflow nen tu query Supabase de lay du lieu moi nhat:
 
@@ -46,7 +67,7 @@ n8n khong nen phu thuoc vao du lieu gui tu frontend. Neu dung chatbot AI, workfl
 - `shop_policies`: giao hang, doi tra, cach dat hang.
 - `orders`: tra cuu don hang khi co ma don hoac so dien thoai, neu policy bao mat cho phep.
 
-## 4. System prompt goi y cho AI Agent
+## 5. System prompt goi y cho AI Agent
 
 ```text
 Ban la chatbot tu van san pham cua shop quan ao MiniStyle.
@@ -61,7 +82,7 @@ Neu co du lieu phu hop, tra loi bang tieng Viet tu nhien, ngan gon, gom:
 Neu khong co san pham phu hop, noi ro chua co san pham trong du lieu hien tai.
 ```
 
-## 5. Bao mat va dao duc AI
+## 6. Bao mat va dao duc AI
 
 - Khong dua API key len GitHub.
 - Khong xu ly thanh toan that trong demo.

@@ -99,6 +99,7 @@ Tạo file `.env.local` ở thư mục gốc:
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your-public-anon-key
+VITE_N8N_CHATBOT_WEBHOOK=https://your-n8n-domain/webhook/your-chat-trigger-id
 VITE_FACEBOOK_MESSENGER_URL=https://m.me/your-facebook-page
 ```
 
@@ -114,6 +115,7 @@ Vào project Vercel -> `Settings` -> `Environment Variables` và thêm:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+- `VITE_N8N_CHATBOT_WEBHOOK`
 - `VITE_FACEBOOK_MESSENGER_URL`
 
 Sau khi thêm hoặc sửa biến môi trường, cần redeploy site. Dự án có [vercel.json](../vercel.json) để rewrite mọi route client-side về `index.html`, giúp các luồng như quên mật khẩu hoặc mở trực tiếp URL không bị 404.

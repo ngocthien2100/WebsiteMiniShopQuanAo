@@ -5,6 +5,23 @@ import { products, shippingPolicy } from "@/shared/data/products";
 const webhookUrl =
   (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_N8N_CHATBOT_WEBHOOK || "";
 
+const productCategories = Array.from(
+  products.reduce((categoryMap, product) => {
+    const current = categoryMap.get(product.category) || {
+      value: product.category,
+      label: product.categoryLabel,
+      productCount: 0,
+    };
+
+    categoryMap.set(product.category, {
+      ...current,
+      productCount: current.productCount + 1,
+    });
+
+    return categoryMap;
+  }, new Map<string, { value: string; label: string; productCount: number }>()),
+).map(([, category]) => category);
+
 export default function N8nChatWidget() {
   useEffect(() => {
     const target = document.querySelector("#n8n-chat");
@@ -44,6 +61,7 @@ export default function N8nChatWidget() {
         },
         metadata: {
           source: "ministyle-website",
+          categories: productCategories,
           products,
           policy: shippingPolicy,
         },

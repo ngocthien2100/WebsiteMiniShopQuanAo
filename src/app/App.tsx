@@ -454,9 +454,30 @@ function FacebookMessengerWidget() {
       rel="noreferrer"
       target="_blank"
     >
-      <MessageCircle size={22} />
-      <span>Chat Facebook</span>
+      <MessengerLogo />
     </a>
+  );
+}
+
+function MessengerLogo() {
+  return (
+    <svg aria-hidden="true" className="messenger-logo" viewBox="0 0 36 36">
+      <defs>
+        <linearGradient id="messengerGradient" x1="6" x2="30" y1="30" y2="6" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#006AFF" />
+          <stop offset="0.52" stopColor="#A033FF" />
+          <stop offset="1" stopColor="#FF5280" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M18 3C9.5 3 3 9.2 3 17.6c0 4.5 1.9 8.4 5 11.1v4.7c0 .4.5.7.8.5l4.5-2.5c1.5.4 3 .7 4.7.7 8.5 0 15-6.2 15-14.6S26.5 3 18 3Z"
+        fill="url(#messengerGradient)"
+      />
+      <path
+        d="m9.4 21.8 4.4-7c.7-1.1 2.2-1.4 3.2-.5l3.5 2.6c.3.2.8.2 1.1-.1l4.7-4.5c.6-.6 1.6.2 1.1.9l-4.4 7c-.7 1.1-2.2 1.4-3.2.5l-3.5-2.6c-.3-.2-.8-.2-1.1.1l-4.7 4.5c-.6.6-1.6-.2-1.1-.9Z"
+        fill="white"
+      />
+    </svg>
   );
 }
 

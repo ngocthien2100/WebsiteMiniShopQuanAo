@@ -1183,7 +1183,9 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
       </div>
       <div>
         <strong>Mạng xã hội</strong>
-        <span>Facebook</span>
+        <a className="footer-link" href={facebookMessengerUrl} rel="noreferrer" target="_blank">
+          Facebook
+        </a>
       </div>
     </footer>
   );

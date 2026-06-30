@@ -1013,13 +1013,24 @@
 }
 
 .site-footer span,
+.site-footer a,
 .site-footer strong {
   display: block;
   margin-bottom: 8px;
 }
 
-.site-footer span {
+.site-footer span,
+.site-footer a {
   color: var(--muted);
+}
+
+.site-footer a {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-footer a:hover {
+  color: var(--brand-dark);
 }
 
 .n8n-chat-host {

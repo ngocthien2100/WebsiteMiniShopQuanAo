@@ -1,8 +1,9 @@
 /*
   MiniStyle typography direction:
-  - Display headings: Georgia
-  - Body/UI: Verdana
+  - Display headings: Times New Roman / Noto Serif / Georgia fallback
+  - Body/UI: Arial / Segoe UI / Roboto fallback
 
-  These are system fonts, so the project does not need Google Fonts or
-  self-hosted commercial font files for the main website typography.
+  These are system font stacks, so the project does not need Google Fonts or
+  self-hosted commercial font files. The stack is intentionally broad to keep
+  Vietnamese diacritics stable across Windows, macOS, Linux, and mobile.
 */

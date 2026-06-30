@@ -186,16 +186,16 @@
    • Dark:   navy #051125        →  deep indigo #111827
    • Card bg: cool #eef4ff      →  warm sage #edf4f1
    • Canvas: #f8f9ff             →  warm cream #f8f7f2
-   • Fonts: Inter → Verdana, Montserrat → Georgia
+   • Fonts: Inter → Arial/Segoe UI, Montserrat → Times New Roman/Noto Serif
 ─────────────────────────────────────────────────────────────────────────── */
 
 /* Font family overrides – matches Figma class strings like font-['Inter:Regular',sans-serif] */
 [class*="Inter:Regular"],
 [class*="Inter:Italic"] {
-  font-family: Verdana, Geneva, Tahoma, sans-serif !important;
+  font-family: Arial, "Segoe UI", Roboto, Helvetica, sans-serif !important;
 }
 [class*="Montserrat:Regular"] {
-  font-family: Georgia, "Times New Roman", serif !important;
+  font-family: "Times New Roman", "Noto Serif", Georgia, serif !important;
 }
 
 /* Accent color: brown #7d562d → forest teal #1a7a68 */

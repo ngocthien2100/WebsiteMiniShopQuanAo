@@ -1,0 +1,661 @@
+{
+  "name": "MiniStyle Facebook Chatbot - Stable Fixed",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const event = $json.body?.entry?.[0]?.messaging?.[0] || {};\nconst rawText = ($json.text || event.message?.text || event.postback?.title || event.postback?.payload || '').toString().trim();\nconst text = rawText.toLowerCase().normalize('NFC');\n\nconst normalized = text\n  .replace(/[.,!?;:]+$/g, '')\n  .replace(/\\s+/g, ' ')\n  .replace(/^số\\s+/, '')\n  .trim();\n\nconst removeTone = (value) => value\n  .toString()\n  .toLowerCase()\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/đ/g, 'd')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst key = removeTone(normalized);\n\nconst categoryMap = {\n  '1': 'Áo',\n  'ao': 'Áo',\n  '2': 'Quần',\n  'quan': 'Quần',\n  '3': 'Váy',\n  'vay': 'Váy',\n  '4': 'Phụ kiện',\n  'phu kien': 'Phụ kiện'\n};\n\nconst greetingSet = new Set([\n  'hi', 'hello', 'xin chao', 'chao', 'chao shop', 'menu', 'tu van',\n  'bat dau', 'start', 'alo', 'shop oi', 'ministyle'\n]);\n\nlet intent = 'ai';\nlet category = '';\n\nif (!rawText) {\n  intent = 'menu';\n} else if (categoryMap[key]) {\n  intent = 'category';\n  category = categoryMap[key];\n} else if (greetingSet.has(key)) {\n  intent = 'menu';\n}\n\nreturn {\n  ...$json,\n  raw_text: rawText,\n  normalized_text: normalized,\n  normalized_key: key,\n  intent,\n  category\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1952,
+        2864
+      ],
+      "id": "3cf44349-a6a5-4c9b-896b-18f784a8fa8d",
+      "name": "Normalize Text"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "category",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "category"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "menu",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "menu"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1664,
+        2848
+      ],
+      "id": "3d761a44-65db-4ca9-a513-c02d64782cbc",
+      "name": "Route Intent"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1WjlU5fzz-81N8aYnYFARM35RXqi1KQYhscoG3zCs27o",
+          "mode": "list",
+          "cachedResultName": "OwO",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WjlU5fzz-81N8aYnYFARM35RXqi1KQYhscoG3zCs27o/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 694231660,
+          "mode": "list",
+          "cachedResultName": "Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WjlU5fzz-81N8aYnYFARM35RXqi1KQYhscoG3zCs27o/edit#gid=694231660"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1312,
+        2576
+      ],
+      "id": "e53cb3ca-8c91-4fa2-924b-091e0e14c7c2",
+      "name": "Get Category Products",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6C9GpOkjajb5Ppq1",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Normalize Text').item.json;\nconst category = source.category;\nconst rows = $input.all().map(item => item.json);\n\nconst normalize = (value) => (value || '')\n  .toString()\n  .toLowerCase()\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/đ/g, 'd')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst wanted = normalize(category);\nconst products = rows.filter(row => {\n  const rowCategory = normalize(row['Danh mục'] || row['Danh Mục'] || row['Danh muc']);\n  const rowType = normalize(row['Phân loại'] || row['Phan loai'] || row['Loại']);\n  return rowCategory === wanted || rowType === wanted;\n});\n\nlet message = '';\n\nif (products.length === 0) {\n  const availableCategories = [...new Set(rows.map(row => row['Danh mục'] || row['Danh Mục'] || row['Phân loại']).filter(Boolean))].join(', ');\n  message = 'MiniStyle chưa tìm thấy sản phẩm thuộc danh mục ' + category + '.\\n\\n'\n    + 'Các danh mục đang đọc được: ' + (availableCategories || 'chưa có dữ liệu') + '.\\n\\n'\n    + 'Anh/chị có thể nhập menu để xem lại danh mục.';\n} else {\n  const icon = category === 'Áo' ? '👕' : category === 'Quần' ? '👖' : category === 'Váy' ? '👗' : '🧢';\n  message = icon + ' ' + category + '\\n\\n';\n\n  products.slice(0, 20).forEach((row, index) => {\n    const name = row['Tên Sản Phẩm'] || row['Tên sản phẩm'] || row['Sản Phẩm'] || row['Ten san pham'] || ('Sản phẩm ' + (index + 1));\n    const price = row['Giá'] || row['Giá bán'] || row['Gia'] || '';\n    const sold = row['Đã bán'] || row['Da ban'] || '';\n    message += (index + 1) + '. ' + name + (price ? ' - ' + price : '') + (sold ? ' · Đã bán: ' + sold : '') + '\\n';\n  });\n\n  if (products.length > 20) {\n    message += '\\nMiniStyle còn ' + (products.length - 20) + ' sản phẩm khác trong danh mục này.';\n  }\n\n  message += '\\nAnh/chị có thể nhập tên sản phẩm để xem chi tiết, giá, màu, size hoặc ảnh.';\n}\n\nreturn {\n  ...source,\n  products,\n  message\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        2576
+      ],
+      "id": "fb88fc64-1df5-4be3-97aa-db4f66ac95bb",
+      "name": "Build Category Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v23.0/me/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Build Category Message').item.json.psid }}\"\n  },\n  \"messaging_type\": \"RESPONSE\",\n  \"message\": {\n    \"text\": {{ JSON.stringify($('Build Category Message').item.json.message) }}\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -736,
+        2576
+      ],
+      "id": "89c51f1b-0291-4a53-8bfc-bbad49366c84",
+      "name": "Send Category Message",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "D7gyjCwH0kagoCGC",
+          "name": "Facebook Graph - Motor AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v23.0/me/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Normalize Text').item.json.psid }}\"\n  },\n  \"messaging_type\": \"RESPONSE\",\n  \"message\": {\n    \"text\": \"Xin chào anh/chị 👋\\n\\nHiện tại MiniStyle có các nhóm sản phẩm:\\n\\n1. Áo 👕\\n2. Quần 👖\\n3. Váy 👗\\n4. Phụ kiện 🧢\\n\\nAnh/chị trả lời số 1, 2, 3 hoặc 4 để xem sản phẩm theo nhóm, hoặc nhập tên sản phẩm để được tư vấn chi tiết.\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1312,
+        2768
+      ],
+      "id": "d3f5de35-dac9-4232-8973-1eaf07d0b335",
+      "name": "Send Menu Message",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "D7gyjCwH0kagoCGC",
+          "name": "Facebook Graph - Motor AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -2176,
+        2464
+      ],
+      "id": "3afddb80-e516-4ee9-aa8f-821e2abafbef",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "chatbotAI",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2400,
+        2560
+      ],
+      "id": "63793219-aaba-4466-8f48-0a68fe5338e2",
+      "name": "Webhook1",
+      "webhookId": "82b2b63b-d3c0-4ea8-9edb-1ec5bc85d67a"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0c32d9c5-6d33-4cb2-8e6a-ebd510d1526c",
+              "name": "psid",
+              "value": "={{ $json.body?.entry?.[0]?.messaging?.[0]?.sender?.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "db1d1994-1e1c-4a6d-a26f-22516a0505b1",
+              "name": "page_id",
+              "value": "={{ $json.body?.entry?.[0]?.messaging?.[0]?.recipient?.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "3f624e9e-b29e-4f26-acfe-34e9166ee42f",
+              "name": "text",
+              "value": "={{ $json.body?.entry?.[0]?.messaging?.[0]?.message?.text || $json.body?.entry?.[0]?.messaging?.[0]?.postback?.title || $json.body?.entry?.[0]?.messaging?.[0]?.postback?.payload || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2176,
+        2864
+      ],
+      "id": "99c5382b-839a-4382-b448-70b0400a66fd",
+      "name": "Get Info1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        3184
+      ],
+      "id": "98bd74a2-a02a-40ff-8dd5-3638b3cc0a73",
+      "name": "2.01",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jCo0bEMbLirwbwQb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v23.0/me/messages",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Normalize Text').item.json.psid }}\"\n  },\n  \"messaging_type\": \"RESPONSE\",\n  \"message\": {\n    \"text\": {{ JSON.stringify($('Ai1').item.json.output || 'MiniStyle hiện chưa xử lý được yêu cầu này. Anh/chị nhập menu để xem danh mục sản phẩm nhé.') }}\n  }\n}",
+        "options": {},
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        3056
+      ],
+      "id": "11532457-68eb-4974-9fb3-2b6e05eba2dc",
+      "name": "Remind User1",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "D7gyjCwH0kagoCGC",
+          "name": "Facebook Graph - Motor AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.ai_input || $('Normalize Text').item.json.raw_text }}",
+        "options": {
+          "systemMessage": "=# Vai trò\nBạn là trợ lý CSKH tự động của MiniStyle, một shop thời trang dành cho sinh viên và người đi làm trẻ tại Việt Nam.\n\n# Mục tiêu\n- Tư vấn quần áo và phụ kiện dựa trên dữ liệu sản phẩm thật được cung cấp trong prompt.\n- Hỗ trợ khách chọn sản phẩm theo danh mục, ngân sách, phong cách, màu sắc, size và dịp sử dụng.\n- Báo giá, mô tả, gợi ý phối đồ, hướng dẫn đặt hàng, giao hàng và đổi size/đổi trả.\n\n# Nguồn dữ liệu bắt buộc\n- Chỉ dùng danh sách sản phẩm và chính sách được cung cấp trong prompt đầu vào.\n- Không tự bịa sản phẩm, giá, màu, size, ảnh, tồn kho, khuyến mãi hoặc chính sách.\n- Nếu dữ liệu không có thông tin, hãy nói rõ: \"Hiện MiniStyle chưa có thông tin này trong hệ thống\".\n\n# Phong cách trả lời\n- Luôn trả lời bằng tiếng Việt tự nhiên, lịch sự, thân thiện.\n- Xưng hô \"anh/chị\".\n- Trả lời ngắn gọn, dễ đọc, không lan man.\n- Nếu khách chưa nói rõ nhu cầu, hỏi tối đa 1 câu để làm rõ.\n- Khi gợi ý sản phẩm, đưa tối đa 3 lựa chọn phù hợp nhất.\n\n# Quy tắc theo tình huống\n1. Nếu khách chào hỏi hoặc muốn xem menu:\nTrả lời menu:\nXin chào anh/chị 👋\nMiniStyle hiện có các nhóm sản phẩm:\n1. Áo 👕\n2. Quần 👖\n3. Váy 👗\n4. Phụ kiện 🧢\nAnh/chị trả lời số 1, 2, 3 hoặc 4 để xem sản phẩm theo nhóm, hoặc nhập tên sản phẩm để được tư vấn chi tiết.\n\n2. Nếu khách hỏi sản phẩm cụ thể:\n- Tìm sản phẩm gần đúng theo tên, danh mục hoặc tag.\n- Trả lời gồm tên, giá, màu/size nếu có, lý do phù hợp và gợi ý phối đồ ngắn.\n\n3. Nếu khách hỏi ảnh/hình sản phẩm:\n- Nêu rõ sản phẩm có ảnh trong hệ thống nếu dữ liệu có URL ảnh hoặc ID ảnh.\n- Không tự tạo link ảnh.\n\n4. Nếu khách hỏi sản phẩm bán chạy/gợi ý:\n- Ưu tiên sản phẩm có cột \"Đã bán\" cao hoặc sản phẩm phù hợp nhất với nhu cầu.\n- Gợi ý tối đa 3 sản phẩm.\n\n5. Nếu khách muốn đặt hàng:\nHỏi đủ thông tin: họ tên, số điện thoại, địa chỉ, sản phẩm, màu, size, số lượng.\nKhông yêu cầu mật khẩu, OTP, thông tin ngân hàng hoặc giấy tờ cá nhân.\n\n6. Nếu khách hỏi ngoài phạm vi MiniStyle:\nTrả lời ngắn rằng bạn chỉ hỗ trợ tư vấn sản phẩm, đơn hàng và chính sách của MiniStyle.\n\n# Định dạng trả lời\n- Trả lời text bình thường để gửi qua Facebook Messenger.\n- Không trả JSON, không markdown phức tạp.\n- Có thể dùng gạch đầu dòng ngắn nếu cần."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -1376,
+        2960
+      ],
+      "id": "c418caa3-54d0-4643-963f-b2af339c8111",
+      "name": "Ai1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v23.0/me/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Webhook1').item.json.body.entry[0].messaging[0].sender.id }}\"\n  },\n  \"sender_action\": \"typing_on\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1664,
+        2656
+      ],
+      "id": "ca3485a3-4c89-4989-82ee-f6bb65cf99e2",
+      "name": "typing_on3",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "D7gyjCwH0kagoCGC",
+          "name": "Facebook Graph - Motor AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1952,
+        2656
+      ],
+      "id": "2a6a764e-9e5a-4093-a383-aa9c8ac6b0a0",
+      "name": "Wait1",
+      "webhookId": "ff4d36c5-2631-496e-b33f-64ee073201fb"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v23.0/me/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $json.body.entry[0].messaging[0].sender.id }}\"\n  },\n  \"sender_action\": \"mark_seen\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2176,
+        2656
+      ],
+      "id": "cd793e9c-9e9d-40a0-b24b-999d884ba47b",
+      "name": "typing_on5",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "D7gyjCwH0kagoCGC",
+          "name": "Facebook Graph - Motor AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1WjlU5fzz-81N8aYnYFARM35RXqi1KQYhscoG3zCs27o",
+          "mode": "list",
+          "cachedResultName": "OwO",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WjlU5fzz-81N8aYnYFARM35RXqi1KQYhscoG3zCs27o/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 694231660,
+          "mode": "list",
+          "cachedResultName": "Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WjlU5fzz-81N8aYnYFARM35RXqi1KQYhscoG3zCs27o/edit#gid=694231660"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1312,
+        3056
+      ],
+      "id": "fixed-get-products-for-ai",
+      "name": "Get Products for AI",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6C9GpOkjajb5Ppq1",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Normalize Text').item.json;\nconst rows = $input.all().map(item => item.json);\n\nconst clean = (value) => value === undefined || value === null ? '' : String(value).trim();\nconst products = rows.map((row, index) => ({\n  stt: clean(row['STT'] || row['stt'] || index + 1),\n  name: clean(row['Tên Sản Phẩm'] || row['Tên sản phẩm'] || row['Sản Phẩm'] || row['Ten san pham']),\n  category: clean(row['Danh mục'] || row['Danh Mục'] || row['Danh muc'] || row['Phân loại']),\n  type: clean(row['Phân loại'] || row['Phan loai']),\n  price: clean(row['Giá'] || row['Giá bán'] || row['Gia']),\n  sold: clean(row['Đã bán'] || row['Da ban']),\n  colors: clean(row['Màu'] || row['Màu sắc'] || row['Mau'] || row['Mau sac']),\n  sizes: clean(row['Size'] || row['Kích thước'] || row['Kich thuoc']),\n  image: clean(row['URL ảnh'] || row['URL Ảnh'] || row['Image'] || row['Ảnh']),\n  attachment_id: clean(row['ID Ảnh'] || row['Attachment ID'])\n})).filter(product => product.name);\n\nconst compactProducts = products.slice(0, 80);\nconst aiInput = [\n  'Tin nhắn khách hàng:',\n  source.raw_text || '',\n  '',\n  'Dữ liệu sản phẩm MiniStyle từ Google Sheet:',\n  JSON.stringify(compactProducts, null, 2),\n  '',\n  'Chính sách shop:',\n  '- Giao hàng toàn quốc từ 2-4 ngày làm việc. Miễn phí vận chuyển cho đơn từ 500.000đ nếu shop đang áp dụng.',\n  '- Đổi size trong 7 ngày nếu sản phẩm còn tem mác và chưa qua sử dụng.',\n  '- Đặt hàng bằng cách cung cấp sản phẩm, màu, size, số lượng, họ tên, số điện thoại và địa chỉ nhận hàng.'\n].join('\\n');\n\nreturn {\n  ...source,\n  products: compactProducts,\n  ai_input: aiInput\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        3056
+      ],
+      "id": "fixed-build-ai-input",
+      "name": "Build AI Input"
+    }
+  ],
+  "pinData": {
+    "Webhook1": [
+      {
+        "json": {
+          "headers": {
+            "host": "ngocthien210.app.n8n.cloud",
+            "user-agent": "facebookexternalua",
+            "content-length": "310",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "2a03:2880:22ff:49::",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "US",
+            "cf-ray": "a134ddff0cbd05e9-IAD",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "facebook-api-version": "v25.0",
+            "x-forwarded-for": "2a03:2880:22ff:49::, 172.71.194.157",
+            "x-forwarded-host": "ngocthien210.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-37-657bd44986-w6bg6",
+            "x-hub-signature": "sha1=0e1eecec86b708bcbbdd5eaf0a14bed0688e2913",
+            "x-hub-signature-256": "sha256=847a990470b4a974a23e3e698643fec62256aa6e853d4396ceba5392a9e83ed1",
+            "x-is-trusted": "yes",
+            "x-real-ip": "2a03:2880:22ff:49::"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "object": "page",
+            "entry": [
+              {
+                "time": 1782735436575,
+                "id": "1162793673580492",
+                "messaging": [
+                  {
+                    "sender": {
+                      "id": "36065517643096053"
+                    },
+                    "recipient": {
+                      "id": "1162793673580492"
+                    },
+                    "timestamp": 1782735436121,
+                    "message": {
+                      "mid": "m_vjMQE65Cy6U79kq0DVqhgvfnGA1aewXZz0P9oFDCRX6-cskavxh7Dcx2s8VvwT4LEP3-NxhS_mcohEioF-95qw",
+                      "text": "1"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "webhookUrl": "https://ngocthien210.app.n8n.cloud/webhook/chatbotAI",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0,
+          "input": 1
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Normalize Text": {
+      "main": [
+        [
+          {
+            "node": "Route Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Intent": {
+      "main": [
+        [
+          {
+            "node": "Get Category Products",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Menu Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Products for AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Category Products": {
+      "main": [
+        [
+          {
+            "node": "Build Category Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Category Message": {
+      "main": [
+        [
+          {
+            "node": "Send Category Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Info1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "typing_on5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Info1": {
+      "main": [
+        [
+          {
+            "node": "Normalize Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2.01": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ai1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ai1": {
+      "main": [
+        [
+          {
+            "node": "Remind User1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "typing_on3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "typing_on5": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Products for AI": {
+      "main": [
+        [
+          {
+            "node": "Build AI Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build AI Input": {
+      "main": [
+        [
+          {
+            "node": "Ai1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "cda552a2-6b83-489a-b9ba-55a483868457",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f2bbae149f253bea37bc320c4bcf66c613c701348867566b5b6420ca556b9f10"
+  },
+  "nodeGroups": [],
+  "id": "Bw3GiEl7qJVB34bd",
+  "tags": []
+}

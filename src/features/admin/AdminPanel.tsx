@@ -1,6 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
+import { ReactNode, useEffect, useState, useMemo } from "react";
 import {
+  AlertCircle,
   LayoutDashboard,
+  Loader2,
   ShoppingBag,
   Users,
   TrendingUp,
@@ -22,9 +24,6 @@ import {
   User,
   Order,
   OrderStatus,
-  getMockUsers,
-  getMockOrders,
-  getMockProducts,
 } from "@/shared/data/mockDb";
 import { Product, ProductCategory, createProductId, formatCurrency } from "@/shared/data/products";
 import {
@@ -55,29 +54,39 @@ interface AdminPanelProps {
 }
 
 type TabType = "dashboard" | "products" | "users";
+type AsyncStatus = "idle" | "loading" | "success" | "error";
 
 export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
-  const [users, setUsers] = useState<User[]>(() => getMockUsers());
-  const [orders, setOrders] = useState<Order[]>(() => getMockOrders());
-  const [products, setProducts] = useState<Product[]>(() => getMockProducts());
+  const [users, setUsers] = useState<User[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [formError, setFormError] = useState("");
   const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [dataStatus, setDataStatus] = useState<AsyncStatus>("idle");
+  const [dataError, setDataError] = useState("");
+
+  const refreshDashboardData = async () => {
+    setDataStatus("loading");
+    setDataError("");
+    try {
+      const [remoteOrders, remoteProducts, remoteUsers] = await Promise.all([
+        loadOrders({ fallbackOnError: false }),
+        loadProducts({ fallbackOnError: false }),
+        loadUsers(),
+      ]);
+      setOrders(remoteOrders);
+      setProducts(remoteProducts);
+      setUsers(remoteUsers);
+      setDataStatus("success");
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : "Không thể tải dữ liệu quản trị.");
+      setDataStatus("error");
+    }
+  };
 
   useEffect(() => {
-    let cancelled = false;
-
-    Promise.all([loadOrders(), loadProducts(), loadUsers()]).then(([remoteOrders, remoteProducts, remoteUsers]) => {
-      if (!cancelled) {
-        setOrders(remoteOrders);
-        setProducts(remoteProducts);
-        setUsers(remoteUsers);
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
+    refreshDashboardData();
   }, []);
 
   // State cho Thêm/Sửa Sản phẩm
@@ -382,9 +391,28 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
           </button>
         </header>
 
+        {dataStatus === "error" && (
+          <PanelStatusState
+            actionLabel="Tải lại dữ liệu"
+            description={dataError || "Không thể đồng bộ dữ liệu từ cơ sở dữ liệu."}
+            icon={<AlertCircle size={22} />}
+            onAction={refreshDashboardData}
+            title="Dữ liệu quản trị đang gặp lỗi"
+            variant="error"
+          />
+        )}
+
         {/* TAB 1: DASHBOARD */}
         {activeTab === "dashboard" && (
           <div className="dashboard-view">
+            {dataStatus === "loading" && (
+              <PanelStatusState
+                description="Đang đồng bộ đơn hàng, sản phẩm và tài khoản mới nhất."
+                icon={<Loader2 size={22} />}
+                title="Đang tải dữ liệu tổng quan"
+                variant="loading"
+              />
+            )}
             {/* Stats Cards */}
             <div className="stats-grid">
               <div className="stat-card">
@@ -455,7 +483,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
 
             {/* Bảng đơn hàng gần đây */}
             <div className="table-section">
-              <h3>Danh sách đơn hàng mẫu</h3>
+              <h3>Danh sách đơn hàng</h3>
               <div className="table-wrapper">
                 <table className="admin-table">
                   <thead>
@@ -471,7 +499,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map((order) => (
+                    {dataStatus !== "loading" && orders.length > 0 ? orders.map((order) => (
                       <tr key={order.id}>
                         <td><strong>{order.id}</strong></td>
                         <td>{order.customerName}</td>
@@ -510,7 +538,17 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                           </select>
                         </td>
                       </tr>
-                    ))}
+                    )) : dataStatus !== "loading" ? (
+                      <tr>
+                        <td colSpan={8}>
+                          <PanelStatusState
+                            description="Hiện chưa có đơn hàng nào trong hệ thống."
+                            icon={<ShoppingBag size={22} />}
+                            title="Chưa có đơn hàng"
+                          />
+                        </td>
+                      </tr>
+                    ) : null}
                   </tbody>
                 </table>
               </div>
@@ -528,6 +566,15 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
               </button>
             </div>
 
+            {dataStatus === "loading" && (
+              <PanelStatusState
+                description="Đang tải danh sách sản phẩm mới nhất."
+                icon={<Loader2 size={22} />}
+                title="Đang tải sản phẩm"
+                variant="loading"
+              />
+            )}
+
             <div className="table-wrapper">
               <table className="admin-table">
                 <thead>
@@ -543,7 +590,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((prod) => (
+                  {dataStatus !== "loading" && products.length > 0 ? products.map((prod) => (
                     <tr key={prod.id}>
                       <td>
                         <img className="product-thumb" src={prod.image} alt={prod.name} />
@@ -568,7 +615,19 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )) : dataStatus !== "loading" ? (
+                    <tr>
+                      <td colSpan={8}>
+                        <PanelStatusState
+                          actionLabel="Thêm sản phẩm"
+                          description="Kho sản phẩm hiện đang trống. Hãy thêm sản phẩm đầu tiên để hiển thị trên trang bán hàng."
+                          icon={<Package size={22} />}
+                          onAction={handleOpenAddProduct}
+                          title="Chưa có sản phẩm"
+                        />
+                      </td>
+                    </tr>
+                  ) : null}
                 </tbody>
               </table>
             </div>
@@ -766,6 +825,37 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
             </form>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+function PanelStatusState({
+  icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  variant = "empty",
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  variant?: "empty" | "loading" | "error";
+}) {
+  return (
+    <div className={`panel-status-state ${variant}`}>
+      {icon}
+      <div>
+        <strong>{title}</strong>
+        <p>{description}</p>
+      </div>
+      {actionLabel && onAction && (
+        <button className="secondary-button" onClick={onAction} type="button">
+          {actionLabel}
+        </button>
       )}
     </div>
   );

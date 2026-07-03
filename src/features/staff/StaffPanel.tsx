@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
+  AlertCircle,
+  Loader2,
   Package,
   Plus,
   Edit2,
@@ -10,7 +12,6 @@ import {
 } from "lucide-react";
 import {
   User,
-  getMockProducts,
 } from "@/shared/data/mockDb";
 import { Product, ProductCategory, createProductId, formatCurrency } from "@/shared/data/products";
 import { getDatabaseModeLabel, loadProducts, saveProducts } from "@/shared/services/shopRepository";
@@ -21,23 +22,30 @@ interface StaffPanelProps {
   onNavigateHome: () => void;
 }
 
+type AsyncStatus = "idle" | "loading" | "success" | "error";
+
 export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: StaffPanelProps) {
-  const [products, setProducts] = useState<Product[]>(() => getMockProducts());
+  const [products, setProducts] = useState<Product[]>([]);
   const [formError, setFormError] = useState("");
   const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [productsStatus, setProductsStatus] = useState<AsyncStatus>("idle");
+  const [productsError, setProductsError] = useState("");
+
+  const refreshProducts = async () => {
+    setProductsStatus("loading");
+    setProductsError("");
+    try {
+      const loadedProducts = await loadProducts({ fallbackOnError: false });
+      setProducts(loadedProducts);
+      setProductsStatus("success");
+    } catch (error) {
+      setProductsError(error instanceof Error ? error.message : "Không thể tải danh sách sản phẩm.");
+      setProductsStatus("error");
+    }
+  };
 
   useEffect(() => {
-    let cancelled = false;
-
-    loadProducts().then((loadedProducts) => {
-      if (!cancelled) {
-        setProducts(loadedProducts);
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
+    refreshProducts();
   }, []);
 
   // State cho Thêm/Sửa Sản phẩm
@@ -219,6 +227,26 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
             </button>
           </div>
 
+          {productsStatus === "loading" && (
+            <PanelStatusState
+              description="Đang đồng bộ sản phẩm mới nhất từ cơ sở dữ liệu."
+              icon={<Loader2 size={22} />}
+              title="Đang tải sản phẩm"
+              variant="loading"
+            />
+          )}
+
+          {productsStatus === "error" && (
+            <PanelStatusState
+              actionLabel="Tải lại dữ liệu"
+              description={productsError || "Không thể tải danh sách sản phẩm."}
+              icon={<AlertCircle size={22} />}
+              onAction={refreshProducts}
+              title="Dữ liệu sản phẩm đang gặp lỗi"
+              variant="error"
+            />
+          )}
+
           <div className="table-wrapper">
             <table className="admin-table">
               <thead>
@@ -234,7 +262,7 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
                 </tr>
               </thead>
               <tbody>
-                {products.map((prod) => (
+                {productsStatus !== "loading" && products.length > 0 ? products.map((prod) => (
                   <tr key={prod.id}>
                     <td>
                       <img className="product-thumb" src={prod.image} alt={prod.name} />
@@ -264,7 +292,19 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
                       </div>
                     </td>
                   </tr>
-                ))}
+                )) : productsStatus !== "loading" ? (
+                  <tr>
+                    <td colSpan={8}>
+                      <PanelStatusState
+                        actionLabel="Thêm sản phẩm"
+                        description="Kho sản phẩm hiện đang trống. Hãy thêm sản phẩm đầu tiên để khách hàng có thể xem trên trang bán hàng."
+                        icon={<Package size={22} />}
+                        onAction={handleOpenAddProduct}
+                        title="Chưa có sản phẩm"
+                      />
+                    </td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
@@ -395,6 +435,37 @@ export default function StaffPanel({ currentUser, onLogout, onNavigateHome }: St
             </form>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+function PanelStatusState({
+  icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  variant = "empty",
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  variant?: "empty" | "loading" | "error";
+}) {
+  return (
+    <div className={`panel-status-state ${variant}`}>
+      {icon}
+      <div>
+        <strong>{title}</strong>
+        <p>{description}</p>
+      </div>
+      {actionLabel && onAction && (
+        <button className="secondary-button" onClick={onAction} type="button">
+          {actionLabel}
+        </button>
       )}
     </div>
   );

@@ -48,6 +48,10 @@ type OrderItemRow = {
   products: ProductRow | null;
 };
 
+type LoadOptions = {
+  fallbackOnError?: boolean;
+};
+
 const toProduct = (row: ProductRow): Product => ({
   id: row.id,
   name: row.name,
@@ -81,7 +85,7 @@ const toProductRow = (product: Product): ProductRow => ({
   is_active: true,
 });
 
-export async function loadProducts(): Promise<Product[]> {
+export async function loadProducts(options: LoadOptions = {}): Promise<Product[]> {
   if (!isSupabaseConfigured || !supabase) {
     return getMockProducts();
   }
@@ -93,8 +97,11 @@ export async function loadProducts(): Promise<Product[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.warn("Supabase products failed, using local data:", error.message);
-    return getMockProducts();
+    if (options.fallbackOnError !== false) {
+      console.warn("Supabase products failed, using local data:", error.message);
+      return getMockProducts();
+    }
+    throw new Error(`Không thể tải sản phẩm từ Supabase: ${error.message}`);
   }
 
   return (data as ProductRow[]).map(toProduct);
@@ -176,7 +183,7 @@ export async function createOrder(order: Order): Promise<Order> {
   return order;
 }
 
-export async function loadOrders(): Promise<Order[]> {
+export async function loadOrders(options: LoadOptions = {}): Promise<Order[]> {
   if (!isSupabaseConfigured || !supabase) {
     return getMockOrders();
   }
@@ -187,8 +194,11 @@ export async function loadOrders(): Promise<Order[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.warn("Supabase orders failed, using local data:", error.message);
-    return getMockOrders();
+    if (options.fallbackOnError !== false) {
+      console.warn("Supabase orders failed, using local data:", error.message);
+      return getMockOrders();
+    }
+    throw new Error(`Không thể tải đơn hàng từ Supabase: ${error.message}`);
   }
 
   return (data as Array<OrderRow & { order_items: OrderItemRow[] }>).map((row) => ({

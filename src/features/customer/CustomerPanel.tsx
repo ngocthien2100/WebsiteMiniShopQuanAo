@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
+  AlertCircle,
   ShoppingBag,
   Clock,
   MapPin,
@@ -11,12 +12,12 @@ import {
   Calendar,
   Mail,
   Lock,
+  Loader2,
 } from "lucide-react";
 import {
   User,
   Order,
   OrderStatus,
-  getMockOrders,
 } from "@/shared/data/mockDb";
 import { formatCurrency } from "@/shared/data/products";
 import { loadOrders, updateOrderStatus } from "@/shared/services/shopRepository";
@@ -26,25 +27,28 @@ interface CustomerPanelProps {
   onNavigateHome: () => void;
 }
 
+type AsyncStatus = "idle" | "loading" | "success" | "error";
+
 export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerPanelProps) {
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const allOrders = getMockOrders();
-    // Lọc ra các đơn hàng của khách hàng hiện tại
-    return allOrders.filter((o) => o.customerId === currentUser.id);
-  });
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersStatus, setOrdersStatus] = useState<AsyncStatus>("idle");
+  const [ordersError, setOrdersError] = useState("");
+
+  const refreshOrders = async () => {
+    setOrdersStatus("loading");
+    setOrdersError("");
+    try {
+      const allOrders = await loadOrders({ fallbackOnError: false });
+      setOrders(allOrders.filter((o) => o.customerId === currentUser.id));
+      setOrdersStatus("success");
+    } catch (error) {
+      setOrdersError(error instanceof Error ? error.message : "Không thể tải đơn hàng.");
+      setOrdersStatus("error");
+    }
+  };
 
   useEffect(() => {
-    let cancelled = false;
-
-    loadOrders().then((allOrders) => {
-      if (!cancelled) {
-        setOrders(allOrders.filter((o) => o.customerId === currentUser.id));
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
+    refreshOrders();
   }, [currentUser.id]);
   
   const [activeSubTab, setActiveSubTab] = useState<"orders" | "profile">("orders");
@@ -58,19 +62,19 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
 
   const handleCancelOrder = async (orderId: string) => {
     if (window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?")) {
-      const allOrders = getMockOrders();
-      const updatedAll = allOrders.map((o) => {
-        if (o.id === orderId && o.customerId === currentUser.id) {
-          return { ...o, status: "cancelled" as OrderStatus };
+      try {
+        await updateOrderStatus(orderId, "cancelled");
+        setOrders((current) =>
+          current.map((order) =>
+            order.id === orderId ? { ...order, status: "cancelled" as OrderStatus } : order,
+          ),
+        );
+        if (selectedOrder && selectedOrder.id === orderId) {
+          setSelectedOrder({ ...selectedOrder, status: "cancelled" });
         }
-        return o;
-      });
-      await updateOrderStatus(orderId, "cancelled");
-
-      // Cập nhật lại state của trang này
-      setOrders(updatedAll.filter((o) => o.customerId === currentUser.id));
-      if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: "cancelled" });
+      } catch (error) {
+        setOrdersError(error instanceof Error ? error.message : "Không thể hủy đơn hàng.");
+        setOrdersStatus("error");
       }
     }
   };
@@ -154,9 +158,29 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
                     </button>
                   </div>
 
+                  {ordersStatus === "loading" && (
+                    <PanelStatusState
+                      description="Đang tải lịch sử đơn hàng mới nhất của bạn."
+                      icon={<Loader2 size={22} />}
+                      title="Đang tải đơn hàng"
+                      variant="loading"
+                    />
+                  )}
+
+                  {ordersStatus === "error" && (
+                    <PanelStatusState
+                      actionLabel="Tải lại đơn hàng"
+                      description={ordersError || "Không thể đồng bộ đơn hàng của bạn."}
+                      icon={<AlertCircle size={22} />}
+                      onAction={refreshOrders}
+                      title="Đơn hàng đang gặp lỗi"
+                      variant="error"
+                    />
+                  )}
+
                   {/* Danh sách đơn hàng */}
                   <div className="orders-list">
-                    {filteredOrders.length > 0 ? (
+                    {ordersStatus !== "loading" && ordersStatus !== "error" && filteredOrders.length > 0 ? (
                       filteredOrders.map((order) => (
                         <article className="order-summary-card" key={order.id}>
                           <div className="card-header">
@@ -206,13 +230,17 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
                           </div>
                         </article>
                       ))
-                    ) : (
-                      <div className="empty-state">
-                        <ShoppingBag size={32} />
-                        <h3>Không tìm thấy đơn hàng nào</h3>
-                        <p>Bạn chưa đặt đơn hàng nào ở trạng thái này.</p>
-                      </div>
-                    )}
+                    ) : ordersStatus !== "loading" && ordersStatus !== "error" ? (
+                      <PanelStatusState
+                        description={
+                          orders.length > 0
+                            ? "Bạn chưa có đơn hàng nào ở trạng thái đang lọc."
+                            : "Khi bạn đặt hàng thành công, đơn hàng sẽ xuất hiện tại đây."
+                        }
+                        icon={<ShoppingBag size={22} />}
+                        title={orders.length > 0 ? "Không có đơn hàng phù hợp" : "Chưa có đơn hàng"}
+                      />
+                    ) : null}
                   </div>
                 </>
               ) : (
@@ -366,5 +394,36 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
         </div>
       </div>
     </section>
+  );
+}
+
+function PanelStatusState({
+  icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  variant = "empty",
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  variant?: "empty" | "loading" | "error";
+}) {
+  return (
+    <div className={`panel-status-state ${variant}`}>
+      {icon}
+      <div>
+        <strong>{title}</strong>
+        <p>{description}</p>
+      </div>
+      {actionLabel && onAction && (
+        <button className="secondary-button" onClick={onAction} type="button">
+          {actionLabel}
+        </button>
+      )}
+    </div>
   );
 }

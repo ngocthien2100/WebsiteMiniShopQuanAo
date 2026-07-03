@@ -1,10 +1,12 @@
-import { FormEvent, useMemo, useState, useEffect } from "react";
+import { FormEvent, ReactNode, useMemo, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
+  AlertCircle,
   Check,
   ChevronRight,
   Clock,
   Key,
+  Loader2,
   Mail,
   MapPin,
   Minus,
@@ -58,6 +60,7 @@ type Page =
   | "staff"
   | "customer";
 type CartItem = { product: Product; quantity: number; size: string; color: string };
+type AsyncStatus = "idle" | "loading" | "success" | "error";
 
 const categories: { value: "all" | ProductCategory; label: string }[] = [
   { value: "all", label: "Tất cả" },
@@ -101,6 +104,8 @@ function App() {
   const [page, setPage] = useState<Page>("home");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [productsList, setProductsList] = useState<Product[]>([]);
+  const [productsStatus, setProductsStatus] = useState<AsyncStatus>("idle");
+  const [productsError, setProductsError] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -116,6 +121,19 @@ function App() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
 
+  const refreshProducts = async () => {
+    setProductsStatus("loading");
+    setProductsError("");
+    try {
+      const loadedProducts = await loadProducts({ fallbackOnError: false });
+      setProductsList(loadedProducts);
+      setProductsStatus("success");
+    } catch (error) {
+      setProductsError(error instanceof Error ? error.message : "Không thể tải danh sách sản phẩm.");
+      setProductsStatus("error");
+    }
+  };
+
   // Khởi tạo mock DB và đồng bộ dữ liệu
   useEffect(() => {
     let cancelled = false;
@@ -126,11 +144,21 @@ function App() {
       setPage("reset-password");
     }
 
-    loadProducts().then((loadedProducts) => {
-      if (!cancelled) {
-        setProductsList(loadedProducts);
-      }
-    });
+    setProductsStatus("loading");
+    setProductsError("");
+    loadProducts({ fallbackOnError: false })
+      .then((loadedProducts) => {
+        if (!cancelled) {
+          setProductsList(loadedProducts);
+          setProductsStatus("success");
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setProductsError(error instanceof Error ? error.message : "Không thể tải danh sách sản phẩm.");
+          setProductsStatus("error");
+        }
+      });
     getCurrentAuthUser().then((logged) => {
       if (!cancelled && logged) {
         setCurrentUser(logged);
@@ -147,11 +175,21 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     if (page === "products" || page === "home" || page === "detail") {
-      loadProducts().then((loadedProducts) => {
-        if (!cancelled) {
-          setProductsList(loadedProducts);
-        }
-      });
+      setProductsStatus("loading");
+      setProductsError("");
+      loadProducts({ fallbackOnError: false })
+        .then((loadedProducts) => {
+          if (!cancelled) {
+            setProductsList(loadedProducts);
+            setProductsStatus("success");
+          }
+        })
+        .catch((error) => {
+          if (!cancelled) {
+            setProductsError(error instanceof Error ? error.message : "Không thể tải danh sách sản phẩm.");
+            setProductsStatus("error");
+          }
+        });
     }
 
     return () => {
@@ -342,6 +380,10 @@ function App() {
                 maxPrice={maxPrice}
                 setMaxPrice={setMaxPrice}
                 priceLimit={productPriceLimit}
+                status={productsStatus}
+                error={productsError}
+                hasProducts={productsList.length > 0}
+                onRetry={refreshProducts}
                 openProduct={openProduct}
                 addToCart={addToCart}
               />
@@ -843,6 +885,10 @@ function ProductsPage({
   maxPrice,
   setMaxPrice,
   priceLimit,
+  status,
+  error,
+  hasProducts,
+  onRetry,
   openProduct,
   addToCart,
 }: {
@@ -854,6 +900,10 @@ function ProductsPage({
   maxPrice: number;
   setMaxPrice: (value: number) => void;
   priceLimit: number;
+  status: AsyncStatus;
+  error: string;
+  hasProducts: boolean;
+  onRetry: () => void;
   openProduct: (product: Product) => void;
   addToCart: (product: Product) => void;
 }) {
@@ -935,8 +985,29 @@ function ProductsPage({
             <span>{products.length} sản phẩm</span>
             <span>Sắp xếp theo mức độ phù hợp</span>
           </div>
-          <div className="product-grid catalog-grid">
-            {products.length > 0 ? (
+          {status === "loading" && (
+            <StatusState
+              description="Hệ thống đang đồng bộ danh sách sản phẩm mới nhất từ cơ sở dữ liệu."
+              icon={<Loader2 size={28} />}
+              title="Đang tải sản phẩm"
+              variant="loading"
+            />
+          )}
+
+          {status === "error" && (
+            <StatusState
+              actionLabel="Thử tải lại"
+              description={error || "Không thể kết nối dữ liệu sản phẩm. Vui lòng kiểm tra Supabase hoặc mạng."}
+              icon={<AlertCircle size={28} />}
+              onAction={onRetry}
+              title="Không thể tải sản phẩm"
+              variant="error"
+            />
+          )}
+
+          {status !== "loading" && status !== "error" && (
+            <div className="product-grid catalog-grid">
+              {products.length > 0 ? (
               products.map((product) => (
                 <ProductCard
                   addToCart={addToCart}
@@ -946,16 +1017,50 @@ function ProductsPage({
                 />
               ))
             ) : (
-              <div className="empty-state">
-                <Search size={24} />
-                <h3>Không tìm thấy sản phẩm</h3>
-                <p>Thử đổi danh mục, từ khóa hoặc tăng khoảng giá.</p>
-              </div>
+              <StatusState
+                description={
+                  hasProducts
+                    ? "Thử đổi danh mục, từ khóa hoặc tăng khoảng giá để xem thêm sản phẩm."
+                    : "Kho sản phẩm hiện chưa có dữ liệu. Quản trị viên hoặc nhân viên cần thêm sản phẩm trước."
+                }
+                icon={<Search size={28} />}
+                title={hasProducts ? "Không tìm thấy sản phẩm phù hợp" : "Chưa có sản phẩm"}
+              />
             )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
+  );
+}
+
+function StatusState({
+  icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  variant = "empty",
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  variant?: "empty" | "loading" | "error";
+}) {
+  return (
+    <div className={`empty-state status-state ${variant}`}>
+      {icon}
+      <h3>{title}</h3>
+      <p>{description}</p>
+      {actionLabel && onAction && (
+        <button className="secondary-button" onClick={onAction} type="button">
+          {actionLabel}
+        </button>
+      )}
+    </div>
   );
 }
 

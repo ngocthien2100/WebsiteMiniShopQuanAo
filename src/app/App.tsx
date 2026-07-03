@@ -3,9 +3,13 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   Check,
   ChevronRight,
+  Clock,
   Key,
+  Mail,
+  MapPin,
   Minus,
   MessageCircle,
+  Phone,
   Plus,
   Search,
   ShoppingBag,
@@ -43,6 +47,7 @@ type Page =
   | "home"
   | "products"
   | "detail"
+  | "contact"
   | "cart"
   | "login"
   | "register"
@@ -352,6 +357,8 @@ function App() {
               />
             )}
 
+            {page === "contact" && <ContactPage navigate={navigate} />}
+
             {page === "cart" && (
               <CartPage
                 cart={cart}
@@ -481,6 +488,93 @@ function MessengerLogo() {
   );
 }
 
+function ContactPage({ navigate }: { navigate: (page: Page) => void }) {
+  const contactChannels = [
+    {
+      icon: MessageCircle,
+      title: "Facebook Messenger",
+      text: "Nhắn tin trực tiếp để được tư vấn size, màu sắc và cách phối đồ.",
+      action: "Mở Messenger",
+      href: facebookMessengerUrl,
+    },
+    {
+      icon: Mail,
+      title: "Email hỗ trợ",
+      text: "Gửi câu hỏi về tài khoản, đơn hàng hoặc phản hồi kỹ thuật.",
+      action: "Gửi email",
+      href: "mailto:ministyle.support@example.com",
+    },
+    {
+      icon: Phone,
+      title: "Tư vấn nhanh",
+      text: "Liên hệ trong giờ làm việc để được hỗ trợ chọn sản phẩm.",
+      action: "Gọi tư vấn",
+      href: "tel:+84900000000",
+    },
+  ];
+
+  return (
+    <section className="page-section contact-page">
+      <div className="contact-hero">
+        <div>
+          <p className="eyebrow">Liên hệ MiniStyle</p>
+          <h1>Luôn sẵn sàng hỗ trợ lựa chọn outfit phù hợp.</h1>
+          <p>
+            Cần tư vấn size, phối đồ, chính sách đổi size hoặc thông tin đơn hàng?
+            MiniStyle ưu tiên phản hồi nhanh qua Messenger và các kênh hỗ trợ bên dưới.
+          </p>
+          <div className="contact-actions">
+            <a className="primary-button" href={facebookMessengerUrl} rel="noreferrer" target="_blank">
+              Nhắn Messenger <MessageCircle size={18} />
+            </a>
+            <button className="secondary-button" onClick={() => navigate("products")} type="button">
+              Xem bộ sưu tập
+            </button>
+          </div>
+        </div>
+        <div className="contact-note">
+          <Clock size={22} />
+          <strong>Thời gian hỗ trợ</strong>
+          <p>08:00 - 21:00 mỗi ngày. Tin nhắn ngoài giờ sẽ được phản hồi vào ca làm việc tiếp theo.</p>
+        </div>
+      </div>
+
+      <div className="contact-grid">
+        {contactChannels.map((channel) => {
+          const Icon = channel.icon;
+          return (
+            <a className="contact-card" href={channel.href} key={channel.title} rel="noreferrer" target="_blank">
+              <Icon size={24} />
+              <span>
+                <strong>{channel.title}</strong>
+                <small>{channel.text}</small>
+              </span>
+              <em>{channel.action}</em>
+            </a>
+          );
+        })}
+      </div>
+
+      <div className="contact-info-band">
+        <article>
+          <MapPin size={22} />
+          <div>
+            <strong>Khu vực phục vụ</strong>
+            <p>Giao hàng toàn quốc, phù hợp demo vận hành thương mại điện tử tại Việt Nam.</p>
+          </div>
+        </article>
+        <article>
+          <Check size={22} />
+          <div>
+            <strong>Thông tin cần chuẩn bị</strong>
+            <p>Khi cần hỗ trợ đơn hàng, hãy gửi họ tên, số điện thoại và sản phẩm quan tâm.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 function Header({
   page,
   cartQuantity,
@@ -518,7 +612,7 @@ function Header({
           {[
             ["home", "Trang chủ"],
             ["products", "Bộ sưu tập"],
-            ["cart", "Giỏ hàng"],
+            ["contact", "Liên hệ"],
           ].map(([id, label]) => (
             <button
               className={page === id ? "active" : ""}
@@ -1180,6 +1274,7 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
         <span style={{ cursor: "pointer" }} onClick={() => navigate("home")}>Trang chủ</span>
         <span style={{ cursor: "pointer" }} onClick={() => navigate("products")}>Sản phẩm</span>
         <span style={{ cursor: "pointer" }} onClick={() => navigate("cart")}>Giỏ hàng</span>
+        <span style={{ cursor: "pointer" }} onClick={() => navigate("contact")}>Liên hệ</span>
       </div>
       <div>
         <strong>Mạng xã hội</strong>

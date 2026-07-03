@@ -8,8 +8,8 @@
   --brand-dark: #123f36;
   --accent: #b36b3f;
   --soft: #e8f2ed;
-  --font-body: Arial, "Segoe UI", Roboto, Helvetica, sans-serif;
-  --font-display: "Times New Roman", "Noto Serif", Georgia, serif;
+  --font-body: Verdana, Geneva, Tahoma, sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
   background:
     radial-gradient(circle at top left, rgba(31, 111, 91, 0.12), transparent 28rem),
     linear-gradient(180deg, #fbf8f1 0%, var(--bg) 45%, #fff 100%);
@@ -23,6 +23,12 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   font-synthesis: none;
+}
+
+.shop-app *,
+.shop-app *::before,
+.shop-app *::after {
+  box-sizing: border-box;
 }
 
 @keyframes ambientBackground {
@@ -976,10 +982,28 @@
   grid-template-columns: minmax(0, 1fr) 390px;
 }
 
+.detail-layout {
+  gap: 36px;
+  grid-template-columns: minmax(360px, 0.95fr) minmax(340px, 0.7fr);
+}
+
 .detail-gallery {
-  aspect-ratio: 4 / 5;
+  align-items: center;
+  aspect-ratio: auto;
+  background: rgba(255, 253, 248, 0.8);
   border-radius: 20px;
+  border: 1px solid var(--line);
+  display: flex;
+  height: min(660px, calc(100vh - 168px));
+  min-height: 480px;
   overflow: hidden;
+  position: sticky;
+  top: 104px;
+}
+
+.detail-gallery img {
+  object-fit: contain;
+  padding: 18px;
 }
 
 .detail-info {
@@ -1257,8 +1281,15 @@
 
   .filters-panel,
   .detail-info,
+  .detail-gallery,
   .checkout-form {
     position: static;
+  }
+
+  .detail-gallery {
+    aspect-ratio: 4 / 5;
+    height: auto;
+    min-height: 0;
   }
 
   .facebook-chat-link {
@@ -1331,7 +1362,11 @@
   .page-title-row h1,
   .detail-info h1 {
     font-size: 38px;
-    line-height: 1.18;
+    line-height: 1.22;
+  }
+
+  .detail-gallery img {
+    padding: 10px;
   }
 
   .product-grid,
@@ -1425,8 +1460,10 @@
 }
 
 .auth-header h2 {
+  font-family: var(--font-display);
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 400;
+  line-height: 1.25;
   margin: 0 0 6px;
 }
 
@@ -1687,13 +1724,14 @@
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  background: #f8fafc;
+  background: linear-gradient(180deg, #fbf8f1 0%, var(--bg) 100%);
+  color: var(--ink);
   width: 100%;
 }
 
 .admin-sidebar {
   width: 260px;
-  background: #0f172a;
+  background: var(--brand-dark);
   color: #f8fafc;
   display: flex;
   flex-direction: column;
@@ -1717,7 +1755,7 @@
   height: 38px;
   background: var(--brand);
   color: white;
-  border-radius: 8px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
   font-weight: 800;
@@ -1725,7 +1763,7 @@
 }
 
 .staff-logo {
-  background: #0891b2;
+  background: var(--accent);
 }
 
 .sidebar-header strong {
@@ -1774,7 +1812,7 @@
 }
 
 .staff-sidebar-style .nav-item.active {
-  background: #0891b2;
+  background: var(--brand);
 }
 
 .sidebar-footer {
@@ -1823,6 +1861,7 @@
   flex-grow: 1;
   padding: 32px;
   overflow-y: auto;
+  background: transparent;
 }
 
 .no-padding {
@@ -1839,14 +1878,16 @@
 }
 
 .content-header h1 {
+  font-family: var(--font-display);
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 400;
+  line-height: 1.2;
   margin: 0 0 6px;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .content-header p {
-  color: #64748b;
+  color: var(--muted);
   margin: 0;
   font-size: 14px;
 }
@@ -2268,8 +2309,10 @@
 }
 
 .portal-header h1 {
+  font-family: var(--font-display);
   font-size: 32px;
-  font-weight: 800;
+  font-weight: 400;
+  line-height: 1.22;
   margin: 0 0 6px;
 }
 

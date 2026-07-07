@@ -192,10 +192,10 @@
 /* Font family overrides – matches Figma class strings like font-['Inter:Regular',sans-serif] */
 [class*="Inter:Regular"],
 [class*="Inter:Italic"] {
-  font-family: Arial, "Segoe UI", Roboto, Helvetica, sans-serif !important;
+  font-family: "Noto Sans", Arial, "Segoe UI", Roboto, Helvetica, sans-serif !important;
 }
 [class*="Montserrat:Regular"] {
-  font-family: "Times New Roman", "Noto Serif", Georgia, serif !important;
+  font-family: "Noto Sans", Arial, "Segoe UI", Roboto, Helvetica, sans-serif !important;
 }
 
 /* Accent color: brown #7d562d → forest teal #1a7a68 */

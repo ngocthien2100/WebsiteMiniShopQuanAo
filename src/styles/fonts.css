@@ -1,9 +1,12 @@
 /*
   MiniStyle typography direction:
-  - Display headings: Times New Roman / Noto Serif / Georgia fallback
-  - Body/UI: Arial / Segoe UI / Roboto fallback
+  - One self-hosted font family for stable rendering across Windows/macOS/Linux
+  - Body/UI/Heading: Noto Sans
 
-  These are system font stacks, so the project does not need Google Fonts or
-  self-hosted commercial font files. The stack is intentionally broad to keep
-  Vietnamese diacritics stable across Windows, macOS, Linux, and mobile.
+  The font is bundled locally via @fontsource so the website keeps the same
+  look even when a machine does not have matching system fonts installed.
 */
+
+@import "@fontsource/noto-sans/400.css";
+@import "@fontsource/noto-sans/500.css";
+@import "@fontsource/noto-sans/700.css";

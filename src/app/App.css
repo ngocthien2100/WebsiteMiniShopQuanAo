@@ -8,8 +8,8 @@
   --brand-dark: #123f36;
   --accent: #b36b3f;
   --soft: #e8f2ed;
-  --font-body: Verdana, Geneva, Tahoma, sans-serif;
-  --font-display: Georgia, "Times New Roman", serif;
+  --font-body: "Noto Sans", Arial, "Segoe UI", Roboto, Helvetica, sans-serif;
+  --font-display: "Noto Sans", Arial, "Segoe UI", Roboto, Helvetica, sans-serif;
   background:
     radial-gradient(circle at top left, rgba(31, 111, 91, 0.12), transparent 28rem),
     linear-gradient(180deg, #fbf8f1 0%, var(--bg) 45%, #fff 100%);

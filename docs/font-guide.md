@@ -1,20 +1,19 @@
 # MiniStyle font guide
 
-MiniStyle dùng hướng chữ thời trang nhưng vẫn ưu tiên dễ đọc tiếng Việt:
+MiniStyle dùng một font duy nhất để giao diện đồng bộ hơn trên mọi máy:
 
-- Heading/editorial: `"Times New Roman", "Noto Serif", Georgia, serif`
-- Body/UI/form/button: `Arial, "Segoe UI", Roboto, Helvetica, sans-serif`
+- Body/UI/form/button/heading: `"Noto Sans", Arial, "Segoe UI", Roboto, Helvetica, sans-serif`
 
-Đây là các system font stack phổ biến, vì vậy dự án không cần Google Fonts và cũng không cần commit file font thương mại vào repository. Cách dùng stack giúp chữ tiếng Việt ổn định hơn khi mở website trên máy khác.
+Dự án self-host font qua `@fontsource`, vì vậy giao diện hiển thị ổn định hơn giữa Windows, macOS, Linux và mobile, kể cả khi máy người dùng không có font tương ứng.
 
 ## Cấu hình trong code
 
 ```css
---font-body: Arial, "Segoe UI", Roboto, Helvetica, sans-serif;
---font-display: "Times New Roman", "Noto Serif", Georgia, serif;
+--font-body: "Noto Sans", Arial, "Segoe UI", Roboto, Helvetica, sans-serif;
+--font-display: "Noto Sans", Arial, "Segoe UI", Roboto, Helvetica, sans-serif;
 ```
 
-Font serif được dùng cho hero, tiêu đề trang, tiêu đề section và các điểm nhấn editorial. Font sans-serif được dùng cho nội dung dài, menu, nút, bảng, form, chatbot và các nút liên hệ để chữ đều, rõ và ổn định trên nhiều thiết bị.
+Font được thống nhất trên toàn site, giúp người dùng không thấy sự thay đổi kiểu chữ giữa các trang hoặc giữa các hệ điều hành.
 
 ## Lý do chọn
 

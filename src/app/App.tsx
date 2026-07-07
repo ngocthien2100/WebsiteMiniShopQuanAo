@@ -1214,15 +1214,15 @@ function CartPage({
                     <strong>{formatCurrency(item.product.price)}</strong>
                   </div>
                   <div className="quantity-control">
-                    <button onClick={() => updateQuantity(item.product.id, -1)} type="button">
+                    <button aria-label="Giảm số lượng" title="Giảm số lượng" onClick={() => updateQuantity(item.product.id, -1)} type="button">
                       <Minus size={16} />
                     </button>
                     <span>{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.product.id, 1)} type="button">
+                    <button aria-label="Tăng số lượng" title="Tăng số lượng" onClick={() => updateQuantity(item.product.id, 1)} type="button">
                       <Plus size={16} />
                     </button>
                   </div>
-                  <button className="icon-button" onClick={() => removeCartItem(item.product.id)} type="button">
+                  <button aria-label="Xóa sản phẩm khỏi giỏ hàng" className="icon-button" title="Xóa sản phẩm khỏi giỏ hàng" onClick={() => removeCartItem(item.product.id)} type="button">
                     <Trash2 size={18} />
                   </button>
                 </motion.article>
@@ -1376,10 +1376,10 @@ function Footer({ navigate }: { navigate: (page: Page) => void }) {
       </div>
       <div>
         <strong>Liên kết</strong>
-        <span style={{ cursor: "pointer" }} onClick={() => navigate("home")}>Trang chủ</span>
-        <span style={{ cursor: "pointer" }} onClick={() => navigate("products")}>Sản phẩm</span>
-        <span style={{ cursor: "pointer" }} onClick={() => navigate("cart")}>Giỏ hàng</span>
-        <span style={{ cursor: "pointer" }} onClick={() => navigate("contact")}>Liên hệ</span>
+        <button className="footer-nav-link" onClick={() => navigate("home")} type="button">Trang chủ</button>
+        <button className="footer-nav-link" onClick={() => navigate("products")} type="button">Sản phẩm</button>
+        <button className="footer-nav-link" onClick={() => navigate("cart")} type="button">Giỏ hàng</button>
+        <button className="footer-nav-link" onClick={() => navigate("contact")} type="button">Liên hệ</button>
       </div>
       <div>
         <strong>Mạng xã hội</strong>

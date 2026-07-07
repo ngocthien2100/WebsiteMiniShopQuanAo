@@ -74,6 +74,7 @@
 
 .site-header {
   align-items: center;
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   background: rgba(255, 253, 248, 0.82);
   border: 1px solid var(--line);
@@ -1200,6 +1201,23 @@
   transition: color 0.2s ease;
 }
 
+.footer-nav-link {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  margin-bottom: 8px;
+  padding: 0;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.footer-nav-link:hover {
+  color: var(--brand-dark);
+}
+
 .site-footer a:hover {
   color: var(--brand-dark);
 }
@@ -1297,7 +1315,7 @@
   }
 
   .hero-section {
-    min-height: auto;
+    min-height: 0;
     padding-top: 46px;
   }
 
@@ -2242,6 +2260,7 @@
   right: 0;
   bottom: 0;
   background: rgba(15, 23, 42, 0.4);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;

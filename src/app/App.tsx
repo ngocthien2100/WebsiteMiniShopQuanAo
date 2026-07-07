@@ -1272,7 +1272,7 @@ function CartPage({
             <input required placeholder="Nguyễn Văn A" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
           </label>
           <label>
-            Số điện thoại liên hệ <span className="optional-note">(không bắt buộc)</span>
+            Số điện thoại liên hệ <span className="optional-note">(bắt buộc nhập)</span>
             <input
               inputMode="tel"
               placeholder="Ví dụ: số của bạn hoặc người thân nhận hàng"

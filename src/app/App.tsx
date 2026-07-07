@@ -100,6 +100,11 @@ const revealVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
+function createOrderId() {
+  const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `MS-${Date.now().toString().slice(-8)}-${suffix}`;
+}
+
 function App() {
   const [page, setPage] = useState<Page>("home");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -278,7 +283,7 @@ function App() {
 
     // Tạo đơn hàng mới
     const newOrder: Order = {
-      id: "MS-" + (1000 + getMockOrders().length + 1),
+      id: createOrderId(),
       customerId: currentUser ? currentUser.id : "guest-customer",
       customerName: customerName || "Khách vãng lai",
       phone: phone.trim() || currentUser?.phone || "",

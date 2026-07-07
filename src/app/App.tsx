@@ -163,6 +163,7 @@ function App() {
       if (!cancelled && logged) {
         setCurrentUser(logged);
         setCustomerName(logged.name);
+        setPhone(logged.phone || "");
       }
     });
 
@@ -280,7 +281,7 @@ function App() {
       id: "MS-" + (1000 + getMockOrders().length + 1),
       customerId: currentUser ? currentUser.id : "guest-customer",
       customerName: customerName || "Khách vãng lai",
-      phone: phone,
+      phone: phone.trim() || currentUser?.phone || "",
       address: address,
       notes: notes,
       items: cart,
@@ -313,12 +314,14 @@ function App() {
     await logoutAuthUser();
     setCurrentUser(null);
     setCustomerName("");
+    setPhone("");
     navigate("home");
   };
 
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
     setCustomerName(user.name);
+    setPhone(user.phone || "");
     if (user.role === "admin") {
       navigate("admin");
     } else if (user.role === "staff") {
@@ -331,6 +334,7 @@ function App() {
   const handleRegisterSuccess = (user: User) => {
     setCurrentUser(user);
     setCustomerName(user.name);
+    setPhone(user.phone || "");
     navigate("home");
   };
 
@@ -1268,8 +1272,14 @@ function CartPage({
             <input required placeholder="Nguyễn Văn A" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
           </label>
           <label>
-            Số điện thoại
-            <input required pattern="[0-9 ]{9,13}" placeholder="090 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            Số điện thoại liên hệ <span className="optional-note">(không bắt buộc)</span>
+            <input
+              inputMode="tel"
+              placeholder="Ví dụ: số của bạn hoặc người thân nhận hàng"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+            <small className="field-hint">Nếu để trống, đơn hàng vẫn được lưu và bạn có thể dùng số của người nhận khác sau.</small>
           </label>
           <label>
             Địa chỉ giao hàng

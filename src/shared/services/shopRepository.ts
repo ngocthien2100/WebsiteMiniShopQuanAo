@@ -31,7 +31,7 @@ type OrderRow = {
   id: string;
   customer_id: string;
   customer_name: string;
-  phone: string;
+  phone: string | null;
   address: string;
   notes: string | null;
   total: number;
@@ -151,7 +151,7 @@ export async function createOrder(order: Order): Promise<Order> {
     id: order.id,
     customer_id: order.customerId,
     customer_name: order.customerName,
-    phone: order.phone,
+    phone: order.phone.trim() || null,
     address: order.address,
     notes: order.notes || null,
     total: order.total,
@@ -205,7 +205,7 @@ export async function loadOrders(options: LoadOptions = {}): Promise<Order[]> {
     id: row.id,
     customerId: row.customer_id,
     customerName: row.customer_name,
-    phone: row.phone,
+    phone: row.phone || "",
     address: row.address,
     notes: row.notes || "",
     total: row.total,

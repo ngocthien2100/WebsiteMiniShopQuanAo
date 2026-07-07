@@ -456,7 +456,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
             {/* Biểu đồ doanh thu */}
             <div className="chart-section">
               <h3>Doanh thu bán hàng 7 ngày gần đây</h3>
-              <div className="chart-container" style={{ width: "100%", height: 300 }}>
+              <div className="chart-container">
                 <ResponsiveContainer>
                   <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <defs>
@@ -503,7 +503,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                       <tr key={order.id}>
                         <td><strong>{order.id}</strong></td>
                         <td>{order.customerName}</td>
-                        <td>{order.phone}</td>
+                        <td>{order.phone?.trim() ? order.phone : "Chưa cung cấp"}</td>
                         <td><span className="address-cell" title={order.address}>{order.address}</span></td>
                         <td>
                           <div className="order-items-cell">
@@ -527,6 +527,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                         <td>
                           <select
                             className="status-selector"
+                            aria-label={`Cập nhật trạng thái đơn ${order.id}`}
                             value={order.status}
                             onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value as OrderStatus)}
                           >
@@ -661,6 +662,7 @@ export default function AdminPanel({ currentUser, onLogout, onNavigateHome }: Ad
                       <td>
                         <select
                           className="role-selector"
+                          aria-label={`Cập nhật vai trò cho ${user.name}`}
                           value={user.role}
                           onChange={(e) => handleChangeUserRole(user.id, e.target.value as any)}
                           disabled={user.id === currentUser.id}

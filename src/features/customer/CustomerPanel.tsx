@@ -278,7 +278,7 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
                       </div>
                       <div className="info-block">
                         <h3><Phone size={16} /> Thông tin liên hệ</h3>
-                        <p>Số điện thoại: {selectedOrder.phone}</p>
+                        <p>Số điện thoại: {selectedOrder.phone?.trim() ? selectedOrder.phone : "Chưa cung cấp"}</p>
                         {selectedOrder.notes && <p className="notes-text">Ghi chú: {selectedOrder.notes}</p>}
                       </div>
                     </div>
@@ -357,7 +357,7 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
                     <UserCheck size={18} />
                     <div>
                       <small>Vai trò hệ thống</small>
-                      <strong style={{ textTransform: "capitalize" }}>{currentUser.role}</strong>
+                      <strong className="role-capitalize">{currentUser.role}</strong>
                     </div>
                   </div>
                   <div className="profile-info-item">
@@ -383,7 +383,7 @@ export default function CustomerPanel({ currentUser, onNavigateHome }: CustomerP
                     <button className="secondary-button" disabled>
                       <Lock size={14} /> Cập nhật (Demo)
                     </button>
-                    <small style={{ color: "#64748b", marginTop: "4px", display: "block" }}>
+                    <small className="profile-note">
                       * Chức năng thay đổi thông tin cá nhân đã được thiết kế khung giao diện.
                     </small>
                   </div>

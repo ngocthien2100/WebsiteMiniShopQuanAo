@@ -8,6 +8,7 @@ export interface User {
   name: string;
   email: string;
   password?: string; // Trong thực tế không lưu password thô hoặc trả về client, ở đây giả lập
+  phone?: string;
   role: UserRole;
   status: UserStatus;
   createdAt: string;

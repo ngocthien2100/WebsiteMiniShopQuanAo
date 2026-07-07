@@ -1,7 +1,8 @@
 /*
   MiniStyle typography direction:
-  - One self-hosted font family for stable rendering across Windows/macOS/Linux
-  - Body/UI/Heading: Noto Sans
+  - Self-hosted font pair for stable rendering across Windows/macOS/Linux
+  - Body/UI: Noto Sans
+  - Display headings: Playfair Display
 
   The font is bundled locally via @fontsource so the website keeps the same
   look even when a machine does not have matching system fonts installed.
@@ -10,3 +11,6 @@
 @import "@fontsource/noto-sans/400.css";
 @import "@fontsource/noto-sans/500.css";
 @import "@fontsource/noto-sans/700.css";
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
